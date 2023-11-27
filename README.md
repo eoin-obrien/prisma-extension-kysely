@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/prisma-extension-kysely.svg)](https://www.npmjs.com/package/prisma-extension-kysely)
 [![GitHub license](https://img.shields.io/github/license/oslabs-beta/prisma-extension-kysely.svg)](https://www.npmjs.com/package/prisma-extension-kysely)
 
-Writing and maintaining raw SQL queries for Prisma can be a tedious and error-prone task. The moment you need to write a query that is not supported out-of-the-box by Prisma, you lose all of that type-safety and autocompletion. This is where `prisma-extension-kysely` comes in! It allowa you to easily write raw SQL queries in a type-safe manner with `kysely` and integrate them seamlessly with Prisma.
+Writing and maintaining raw SQL queries for Prisma can be a tedious and error-prone task. The moment you need to write a query that is not supported out-of-the-box by Prisma, you lose all of that type-safety and autocompletion. This is where `prisma-extension-kysely` comes in! It allowa you to easily write raw SQL queries in a type-safe manner with [`kysely`](https://kysely.dev/) and integrate them seamlessly with Prisma.
 
 ## Features
 
@@ -23,7 +23,7 @@ Install the dependencies:
 npm install prisma-extension-kysely kysely
 ```
 
-Set up the excellent `prisma-kysely` library to automatically generate types for your database:
+Set up the excellent [`prisma-kysely`](https://www.npmjs.com/package/prisma-kysely) library to automatically generate types for your database:
 
 ```shell
 npm install -D prisma-kysely
@@ -96,10 +96,8 @@ npm run dev
 
 ## Learn more
 
-- [Docs — Client extensions](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions)
-- [Docs — Shared extensions](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions/shared-extensions)
-- [Examples](https://github.com/prisma/prisma-client-extensions/tree/main)
-- [Preview announcement blog post](https://www.prisma.io/blog/client-extensions-preview-8t3w27xkrxxn#introduction)
+- [Kysely](https://kysely.dev/)
+- [`prisma-kysely`](https://www.npmjs.com/package/prisma-kysely)
 
 ## License
 
