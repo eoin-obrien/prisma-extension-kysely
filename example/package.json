@@ -1,0 +1,14 @@
+{
+  "name": "example",
+  "scripts": {
+    "dev": "ts-node --transpile-only index.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.15.0"
+  },
+  "devDependencies": {
+    "prisma": "^4.15.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  }
+}

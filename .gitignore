@@ -1,0 +1,11 @@
+# Dependency directories
+node_modules/
+
+dist/
+
+# dotenv environment variable files
+.env
+
+package-lock.json
+*.tgz
+dev.db
