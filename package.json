@@ -24,8 +24,11 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "prepare": "husky install",
     "commit": "git-cz",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "config": {
     "commitizen": {
@@ -44,9 +47,11 @@
     "@typescript-eslint/parser": "^6.13.0",
     "commitizen": "^4.3.0",
     "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
     "husky": "^8.0.3",
     "inquirer": "^8.2.6",
     "kysely": "^0.26.3",
+    "prettier": "3.1.0",
     "prisma": "latest",
     "typescript": "^4.9.4"
   }
