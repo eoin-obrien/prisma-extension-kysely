@@ -5,18 +5,18 @@ import type { Compilable, Kysely, Simplify } from "kysely";
 /**
  * The configuration object for the Prisma Kysely extension
  */
-export type PrismaKyselyExtensionArgs<DB> = {
+export type PrismaKyselyExtensionArgs<Database> = {
   /**
    * The Kysely instance to provide to the Prisma client
    */
-  kysely: Kysely<DB>;
+  kysely: Kysely<Database>;
 };
 
 /**
  * Define a Prisma extension that adds Kysely query builder methods to the Prisma client
  * @param extensionArgs The extension configuration object
  */
-export default <DB>(extensionArgs: PrismaKyselyExtensionArgs<DB>) =>
+export default <Database>(extensionArgs: PrismaKyselyExtensionArgs<Database>) =>
   Prisma.defineExtension((client) => {
     return client.$extends({
       name: "prisma-extension-kysely",
@@ -34,6 +34,7 @@ export default <DB>(extensionArgs: PrismaKyselyExtensionArgs<DB>) =>
         $kyselyQuery<T>(query: Compilable<T>): Promise<Simplify<T>[]> {
           const { sql, parameters } = query.compile();
           const ctx = Prisma.getExtensionContext(this);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return (ctx as any).$queryRawUnsafe(sql, ...parameters);
         },
 
@@ -45,6 +46,7 @@ export default <DB>(extensionArgs: PrismaKyselyExtensionArgs<DB>) =>
         $kyselyExecute(query: Compilable): PrismaPromise<number> {
           const { sql, parameters } = query.compile();
           const ctx = Prisma.getExtensionContext(this);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return (ctx as any).$executeRawUnsafe(sql, ...parameters);
         },
       },

@@ -235,3 +235,9 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/node,visualstudiocode,linux,windows,macos
+
+# Prisma development sqlite database
+dev.db
+
+# Prisma Kysely generated files
+prisma/generated
