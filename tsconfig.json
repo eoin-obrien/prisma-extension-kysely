@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "lib": ["ES2016"],
+    "target": "ES2016",
+    "lib": ["ES2018"],
     "module": "CommonJS",
     "moduleResolution": "node",
     "esModuleInterop": true,
