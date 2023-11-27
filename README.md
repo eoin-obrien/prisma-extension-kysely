@@ -46,38 +46,41 @@ npx prisma generate
 Extend your Prisma Client:
 
 ```typescript
-import kyselyExtension from 'prisma-extension-kysely'
-import type { DB } from './prisma/generated/types'
+import kyselyExtension from "prisma-extension-kysely";
+import type { DB } from "./prisma/generated/types";
 
 // Don't forget to customize this to match your database!
 const kysely = new Kysely<DB>({
-    dialect: {
-        createAdapter: () => new PostgresAdapter(),
-        createDriver: () => new DummyDriver(),
-        createIntrospector: (db) => new PostgresIntrospector(db),
-        createQueryCompiler: () => new PostgresQueryCompiler(),
-    },
-})
+  dialect: {
+    createAdapter: () => new PostgresAdapter(),
+    createDriver: () => new DummyDriver(),
+    createIntrospector: (db) => new PostgresIntrospector(db),
+    createQueryCompiler: () => new PostgresQueryCompiler(),
+  },
+});
 
-const prisma = new PrismaClient().$extends(kyselyExtension({ kysely }))
+const prisma = new PrismaClient().$extends(kyselyExtension({ kysely }));
 ```
 
 It's that simple! Now you can write raw SQL queries with `kysely` and use them with Prisma:
 
 ```typescript
 // Replace this...
-const result = prisma.$queryRaw`SELECT * FROM User WHERE id = ${id}`
+const result = prisma.$queryRaw`SELECT * FROM User WHERE id = ${id}`;
 
 // With this!
-const query = prisma.$kysely.selectFrom('User').selectAll().where('id', '=', id)
+const query = prisma.$kysely
+  .selectFrom("User")
+  .selectAll()
+  .where("id", "=", id);
 
 // Thanks to kysely's magic, everything is type-safe!
-const result = await prisma.$kyselyQuery(query)
+const result = await prisma.$kyselyQuery(query);
 
 // You can also execute queries without fetching the results
 await prisma.$kyselyExecute(
-    prisma.$kysely.deleteFrom('User').where('id', '=', id)
-)
+  prisma.$kysely.deleteFrom("User").where("id", "=", id),
+);
 ```
 
 ## Examples
