@@ -1,5 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { DummyDriver, Kysely, SqliteAdapter, SqliteIntrospector, SqliteQueryCompiler } from "kysely";
+import {
+  DummyDriver,
+  Kysely,
+  SqliteAdapter,
+  SqliteIntrospector,
+  SqliteQueryCompiler,
+} from "kysely";
 import kyselyExtension from "../src";
 import { DB } from "../prisma/generated/types";
 
@@ -29,18 +35,28 @@ describe("prisma-extension-kysely", () => {
   });
 
   it("should execute a Kysely query with $kyselyQuery and return the result", async () => {
-    const spy = jest.spyOn(xprisma, "$queryRawUnsafe").mockResolvedValueOnce([]);
+    const spy = jest
+      .spyOn(xprisma, "$queryRawUnsafe")
+      .mockResolvedValueOnce([]);
     const query = kysely.selectFrom("Model").selectAll().where("id", "=", 1);
     const result = await xprisma.$kyselyQuery(query);
     expect(result).toEqual([]);
-    expect(spy).toHaveBeenCalledWith(query.compile().sql, ...query.compile().parameters);
+    expect(spy).toHaveBeenCalledWith(
+      query.compile().sql,
+      ...query.compile().parameters,
+    );
   });
 
   it("should execute a Kysely query with $kyselyExecute and return the number of rows affected", async () => {
-    const spy = jest.spyOn(xprisma, "$executeRawUnsafe").mockResolvedValueOnce(1);
+    const spy = jest
+      .spyOn(xprisma, "$executeRawUnsafe")
+      .mockResolvedValueOnce(1);
     const query = kysely.deleteFrom("Model").where("id", "=", 1);
     const result = await xprisma.$kyselyExecute(query);
     expect(result).toEqual(1);
-    expect(spy).toHaveBeenCalledWith(query.compile().sql, ...query.compile().parameters);
+    expect(spy).toHaveBeenCalledWith(
+      query.compile().sql,
+      ...query.compile().parameters,
+    );
   });
 });
