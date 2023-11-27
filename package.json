@@ -1,9 +1,25 @@
 {
-  "name": "prisma-client-extension-starter",
+  "name": "prisma-extension-kysely",
   "version": "0.0.0",
-  "author": "",
-  "description": "",
-  "keywords": ["prisma", "@prisma/client", "extension"],
+  "author": {
+    "name": "Eoin O'Brien",
+    "url": "https://eoin.ai",
+    "email": "eoin@tracworx.ai"
+  },
+  "description": "Prisma extension for Kysely",
+  "keywords": [
+    "prisma",
+    "@prisma/client",
+    "extension",
+    "kysely",
+    "sql",
+    "query builder",
+    "orm",
+    "database",
+    "postgresql",
+    "mysql",
+    "sqlite"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,6 +30,7 @@
   },
   "devDependencies": {
     "@prisma/client": "latest",
+    "kysely": "^0.26.3",
     "prisma": "latest",
     "typescript": "4.9.4"
   }
