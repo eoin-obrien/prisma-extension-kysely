@@ -32,7 +32,9 @@
   ],
   "scripts": {
     "test": "prisma generate && prisma db push && jest",
+    "clean": "rm -rf ./dist",
     "build": "tsc",
+    "prepack": "npm run clean && npm run build",
     "prepare": "husky install",
     "commit": "git-cz",
     "lint": "eslint .",
