@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v1.0.1...v1.0.2) (2023-12-01)
+
+
+### Bug Fixes
+
+* **npm:** add prepack script ([e308104](https://github.com/eoin-obrien/prisma-extension-kysely/commit/e308104ed8c5578dc709e0e8e1f6de2998ad7fe3))
+
 ## [1.0.1](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v1.0.0...v1.0.1) (2023-11-28)
 
 
