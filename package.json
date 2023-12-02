@@ -31,7 +31,10 @@
     "dist"
   ],
   "scripts": {
-    "test": "prisma generate && prisma db push && jest",
+    "pretest": "npm run build && prisma db push",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "clean": "rm -rf ./dist",
     "build": "tsc",
     "prepack": "npm run clean && npm run build",
