@@ -5,6 +5,7 @@
 [![GitHub license](https://img.shields.io/github/license/eoin-obrien/prisma-extension-kysely.svg)](https://www.npmjs.com/package/prisma-extension-kysely)
 [![Node.js CI](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/node.js.yml/badge.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/node.js.yml)
 [![Node.js Package](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/npm-publish.yml)
+[![codecov](https://codecov.io/gh/eoin-obrien/prisma-extension-kysely/graph/badge.svg?token=C18C7BGISJ)](https://codecov.io/gh/eoin-obrien/prisma-extension-kysely)
 
 Writing and maintaining raw SQL queries for Prisma can be a tedious and error-prone task. The moment you need to write a query that is not supported out-of-the-box by Prisma, you lose all of that type-safety and autocompletion. This is where `prisma-extension-kysely` comes in! It allows you to easily write raw SQL queries in a type-safe manner with [`kysely`](https://kysely.dev/) and integrate them seamlessly with Prisma.
 
