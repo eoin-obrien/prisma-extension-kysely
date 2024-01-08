@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.3](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v1.0.2...v1.0.3) (2024-01-07)
+
+
+### Bug Fixes
+
+* **deps:** update prisma monorepo to v5.7.0 ([1435419](https://github.com/eoin-obrien/prisma-extension-kysely/commit/143541957f0c1685abb64c89beb8a030133ec39d))
+* **deps:** update prisma monorepo to v5.7.1 ([97eccc8](https://github.com/eoin-obrien/prisma-extension-kysely/commit/97eccc8c4dcc22d73c7564d7760ac8317efbe397))
+
 ## [1.0.2](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v1.0.1...v1.0.2) (2023-12-01)
 
 
