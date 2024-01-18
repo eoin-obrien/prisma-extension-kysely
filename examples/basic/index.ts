@@ -24,9 +24,13 @@ const prisma = new PrismaClient().$extends(
 
 async function main() {
   // Clear the database before running the example
-  const deletedPosts = await prisma.$kysely.deleteFrom("Post").executeTakeFirstOrThrow();
+  const deletedPosts = await prisma.$kysely
+    .deleteFrom("Post")
+    .executeTakeFirstOrThrow();
   console.log("Deleted posts:", Number(deletedPosts.numDeletedRows));
-  const deletedUsers = await prisma.$kysely.deleteFrom("User").executeTakeFirstOrThrow();
+  const deletedUsers = await prisma.$kysely
+    .deleteFrom("User")
+    .executeTakeFirstOrThrow();
   console.log("Deleted users:", Number(deletedUsers.numDeletedRows));
 
   // Create and update a user
