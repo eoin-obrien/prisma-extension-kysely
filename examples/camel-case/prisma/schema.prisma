@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+}
+
+generator kysely {
+  provider = "prisma-kysely"
+  camelCase = true
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id    Int    @id @default(autoincrement()) @map("id")
+  email String @unique @map("email")
+  name  String @map("name")
+
+  posts Post[]
+
+  @@map("users")
+}
+
+model Post {
+  id        Int      @id @default(autoincrement()) @map("id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  title     String @map("title")
+  content   String? @map("content")
+  published Boolean  @default(false) @map("published")
+
+  author   User @relation(fields: [authorId], references: [id])
+  authorId Int @map("author_id")
+
+  @@map("posts")
+}
