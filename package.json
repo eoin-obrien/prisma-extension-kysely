@@ -33,8 +33,8 @@
   "scripts": {
     "pretest": "npm run build && prisma db push",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test:watch": "npm run test -- --watch",
+    "test:coverage": "npm run test -- --coverage",
     "clean": "rm -rf ./dist",
     "build": "tsc",
     "prepack": "npm run clean && npm run build",
