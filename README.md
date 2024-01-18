@@ -9,6 +9,10 @@
 
 Writing and maintaining raw SQL queries for Prisma can be a tedious and error-prone task. The moment you need to write a query that is not supported out-of-the-box by Prisma, you lose all of that type-safety and autocompletion. This is where `prisma-extension-kysely` comes in! It allows you to easily write raw SQL queries in a type-safe manner with [`kysely`](https://kysely.dev/) and integrate them seamlessly with Prisma.
 
+And the best part? You can use all of your favorite [`kysely`](https://kysely.dev/) plugins with `prisma-extension-kysely` too!
+
+You don't have to take our word for it, though:
+
 > I have to say, this is BY FAR the most amazing community package I've seen in the Prisma ecosystem!
 >
 > It makes it so much more convenient to drop down to raw SQL when needed without sacrificing DX — best of both worlds! 🚀
