@@ -9,6 +9,12 @@
 
 Writing and maintaining raw SQL queries for Prisma can be a tedious and error-prone task. The moment you need to write a query that is not supported out-of-the-box by Prisma, you lose all of that type-safety and autocompletion. This is where `prisma-extension-kysely` comes in! It allows you to easily write raw SQL queries in a type-safe manner with [`kysely`](https://kysely.dev/) and integrate them seamlessly with Prisma.
 
+> I have to say, this is BY FAR the most amazing community package I've seen in the Prisma ecosystem!
+>
+> It makes it so much more convenient to drop down to raw SQL when needed without sacrificing DX — best of both worlds! 🚀
+
+— [Nikolas Burk, DevRel @ Prisma](https://twitter.com/nikolasburk/status/1747901827960471699)
+
 ## Features
 
 - **Type-safe** — Write raw SQL queries in a type-safe manner with `kysely`
@@ -52,17 +58,22 @@ Extend your Prisma Client:
 import kyselyExtension from "prisma-extension-kysely";
 import type { DB } from "./prisma/generated/types";
 
-// Don't forget to customize this to match your database!
-const kysely = new Kysely<DB>({
-  dialect: {
-    createAdapter: () => new PostgresAdapter(),
-    createDriver: () => new DummyDriver(),
-    createIntrospector: (db) => new PostgresIntrospector(db),
-    createQueryCompiler: () => new PostgresQueryCompiler(),
-  },
-});
-
-const prisma = new PrismaClient().$extends(kyselyExtension({ kysely }));
+const prisma = new PrismaClient().$extends(
+  kyselyExtension({
+    kysely: (driver) =>
+      new Kysely<DB>({
+        dialect: {
+          // This is where the magic happens!
+          createDriver: () => driver,
+          // Don't forget to customize these to match your database!
+          createAdapter: () => new PostgresAdapter(),
+          createIntrospector: (db) => new PostgresIntrospector(db),
+          createQueryCompiler: () => new PostgresQueryCompiler(),
+        },
+        plugins: [new CamelCasePlugin()],
+      }),
+  }),
+);
 ```
 
 It's that simple! Now you can write raw SQL queries with `kysely` and use them with Prisma:
@@ -78,20 +89,51 @@ const query = prisma.$kysely
   .where("id", "=", id);
 
 // Thanks to kysely's magic, everything is type-safe!
-const result = await prisma.$kyselyQuery(query);
+const result = await query.execute();
 
 // You can also execute queries without fetching the results
-await prisma.$kyselyExecute(
-  prisma.$kysely.deleteFrom("User").where("id", "=", id),
+await prisma.$kysely.deleteFrom("User").where("id", "=", id).execute();
+```
+
+## Plugins
+
+Do you love Kysely's plugins? So do we! You can use them with `prisma-extension-kysely` as well:
+
+```typescript
+const prisma = new PrismaClient().$extends(
+  kyselyExtension({
+    kysely: (driver) =>
+      new Kysely<DB>({
+        dialect: {
+          createDriver: () => driver,
+          createAdapter: () => new PostgresAdapter(),
+          createIntrospector: (db) => new PostgresIntrospector(db),
+          createQueryCompiler: () => new PostgresQueryCompiler(),
+        },
+        // Use your favorite plugins!
+        plugins: [new CamelCasePlugin()],
+      }),
+  }),
 );
 ```
 
+If you're using the `CamelCasePlugin`, don't forget to add the `camelCase` option to your Prisma schema too:
+
+```prisma
+generator kysely {
+  provider = "prisma-kysely"
+  camelCase = true
+}
+```
+
+Take a look at [the camel case example](examples/camel-case/) to see it in action! Check out the [Kysely documentation](https://kysely.dev/) for more information about plugins.
+
 ## Examples
 
-Check out the [example](example) directory for a sample project!
+Check out the [examples](examples) directory for a sample project!
 
 ```shell
-cd examples
+cd examples/basic
 npm install
 npx prisma db push
 npm run dev
