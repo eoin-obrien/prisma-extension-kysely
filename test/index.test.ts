@@ -1,30 +1,65 @@
 import { PrismaClient } from "@prisma/client";
 import {
-  DummyDriver,
+  Compilable,
+  DeleteResult,
+  InsertResult,
   Kysely,
+  KyselyPlugin,
   SqliteAdapter,
   SqliteIntrospector,
   SqliteQueryCompiler,
+  UpdateResult,
 } from "kysely";
-import kyselyExtension from "../src";
 import { DB } from "../prisma/generated/types";
+import kyselyExtension from "../src";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const kysely = new Kysely<DB>({
-  dialect: {
-    createAdapter: () => new SqliteAdapter(),
-    createDriver: () => new DummyDriver(),
-    createIntrospector: (db) => new SqliteIntrospector(db),
-    createQueryCompiler: () => new SqliteQueryCompiler(),
-  },
-});
 
 describe("prisma-extension-kysely", () => {
   const prisma = new PrismaClient();
-  const xprisma = prisma.$extends(kyselyExtension({ kysely }));
+  const xprisma = prisma.$extends(
+    kyselyExtension({
+      kysely: (driver) =>
+        new Kysely<DB>({
+          dialect: {
+            createAdapter: () => new SqliteAdapter(),
+            createDriver: () => driver,
+            createIntrospector: (db) => new SqliteIntrospector(db),
+            createQueryCompiler: () => new SqliteQueryCompiler(),
+          },
+        }),
+    }),
+  );
+
+  const $queryRawUnsafeSpy = jest.spyOn(prisma, "$queryRawUnsafe");
+  const $executeRawUnsafeSpy = jest.spyOn(prisma, "$executeRawUnsafe");
+
+  const checkSpyCalledWith = (
+    spy: jest.SpyInstance,
+    query: Compilable<unknown>,
+  ) => {
+    const { sql, parameters } = query.compile();
+    expect(spy).toHaveBeenCalledWith(sql, ...parameters);
+  };
+
+  let testRow: { id: number; value: string };
+
+  beforeEach(async () => {
+    // Clear the database before each test
+    await xprisma.$kysely.deleteFrom("Model").execute();
+    // Insert a row to test with
+    testRow = await xprisma.$kysely
+      .insertInto("Model")
+      .values({ value: "test" })
+      .returningAll()
+      .executeTakeFirstOrThrow();
+    // Reset the spies
+    $queryRawUnsafeSpy.mockClear();
+    $executeRawUnsafeSpy.mockClear();
+  });
 
   it("should add the Kysely instance to the Prisma client", async () => {
-    expect(xprisma.$kysely).toBe(kysely);
+    expect(xprisma.$kysely).toBeInstanceOf(Kysely);
   });
 
   it("should not overwrite any existing Prisma client methods", async () => {
@@ -34,29 +69,107 @@ describe("prisma-extension-kysely", () => {
     expect(xprisma.$executeRawUnsafe).toEqual(prisma.$executeRawUnsafe);
   });
 
-  it("should execute a Kysely query with $kyselyQuery and return the result", async () => {
-    const spy = jest
-      .spyOn(xprisma, "$queryRawUnsafe")
-      .mockResolvedValueOnce([]);
-    const query = kysely.selectFrom("Model").selectAll().where("id", "=", 1);
-    const result = await xprisma.$kyselyQuery(query);
-    expect(result).toEqual([]);
-    expect(spy).toHaveBeenCalledWith(
-      query.compile().sql,
-      ...query.compile().parameters,
+  it("should execute a select query and return the result", async () => {
+    const query = xprisma.$kysely
+      .selectFrom("Model")
+      .selectAll()
+      .where("id", "=", testRow.id);
+    await expect(query.execute()).resolves.toEqual([testRow]);
+    checkSpyCalledWith($queryRawUnsafeSpy, query);
+  });
+
+  it("should execute an insert query and return the number of rows affected", async () => {
+    const query = xprisma.$kysely
+      .insertInto("Model")
+      .values({ value: "inserted" });
+    await expect(query.execute()).resolves.toEqual([
+      new InsertResult(undefined, BigInt(1)),
+    ]);
+    checkSpyCalledWith($executeRawUnsafeSpy, query);
+  });
+
+  it("should execute an update query and return the number of rows affected", async () => {
+    const query = xprisma.$kysely
+      .updateTable("Model")
+      .set({ value: "updated" })
+      .where("id", "=", testRow.id);
+    await expect(query.execute()).resolves.toEqual([
+      new UpdateResult(BigInt(1), undefined),
+    ]);
+    checkSpyCalledWith($executeRawUnsafeSpy, query);
+  });
+
+  it("should execute a delete query and return the number of rows affected", async () => {
+    const query = xprisma.$kysely
+      .deleteFrom("Model")
+      .where("id", "=", testRow.id);
+    await expect(query.execute()).resolves.toEqual([
+      new DeleteResult(BigInt(1)),
+    ]);
+    checkSpyCalledWith($executeRawUnsafeSpy, query);
+  });
+
+  it("should execute an insert query with a returning clause and return the results", async () => {
+    const query = xprisma.$kysely
+      .insertInto("Model")
+      .values({ value: "inserted" })
+      .returningAll();
+    await expect(query.execute()).resolves.toEqual([
+      { id: expect.any(Number), value: "inserted" },
+    ]);
+    checkSpyCalledWith($queryRawUnsafeSpy, query);
+  });
+
+  it("should execute an update query with a returning clause and return the results", async () => {
+    const query = xprisma.$kysely
+      .updateTable("Model")
+      .set({ value: "updated" })
+      .where("id", "=", testRow.id)
+      .returningAll();
+    await expect(query.execute()).resolves.toEqual([
+      { id: testRow.id, value: "updated" },
+    ]);
+    checkSpyCalledWith($queryRawUnsafeSpy, query);
+  });
+
+  it("should execute an update query with a returning clause and return the results", async () => {
+    const query = xprisma.$kysely
+      .deleteFrom("Model")
+      .where("id", "=", testRow.id)
+      .returningAll();
+    await expect(query.execute()).resolves.toEqual([testRow]);
+    checkSpyCalledWith($queryRawUnsafeSpy, query);
+  });
+
+  it("should throw an error if a query is executed with a stream", async () => {
+    const query = xprisma.$kysely.selectFrom("Model").selectAll();
+    await expect(query.stream().next()).rejects.toThrow(
+      "prisma-extension-kysely does not support streaming queries",
     );
   });
 
-  it("should execute a Kysely query with $kyselyExecute and return the number of rows affected", async () => {
-    const spy = jest
-      .spyOn(xprisma, "$executeRawUnsafe")
-      .mockResolvedValueOnce(1);
-    const query = kysely.deleteFrom("Model").where("id", "=", 1);
-    const result = await xprisma.$kyselyExecute(query);
-    expect(result).toEqual(1);
-    expect(spy).toHaveBeenCalledWith(
-      query.compile().sql,
-      ...query.compile().parameters,
+  it("should throw an error if a transaction is started", async () => {
+    await expect(
+      xprisma.$kysely.transaction().execute(async () => {}),
+    ).rejects.toThrow("prisma-extension-kysely does not support transactions");
+  });
+
+  it("should support kysely plugins", async () => {
+    const plugin: KyselyPlugin = {
+      transformQuery: jest.fn((args) => args.node),
+      transformResult: jest.fn(async (args) => args.result),
+    };
+    const query = xprisma.$kysely
+      .withPlugin(plugin)
+      .selectFrom("Model")
+      .selectAll();
+    const rows = await query.execute();
+    expect(rows).toEqual([testRow]);
+    expect(plugin.transformQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ node: query.compile().query }),
+    );
+    expect(plugin.transformResult).toHaveBeenCalledWith(
+      expect.objectContaining({ result: { rows } }),
     );
   });
 });

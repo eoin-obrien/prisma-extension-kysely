@@ -16,4 +16,5 @@ datasource db {
 
 model Model {
   id    Int    @id @default(autoincrement())
+  value String
 }
