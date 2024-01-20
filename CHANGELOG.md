@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.0](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v1.0.4...v2.0.0) (2024-01-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* Remove the $kyselyQuery and $kyselyExecute methods.
+* Change the way the extension is initialized.
+
+### Features
+
+* enable use of kysely in prisma's interactive transactions ([04865ee](https://github.com/eoin-obrien/prisma-extension-kysely/commit/04865ee0a61323d508ca7ce0ebe1f5d9ae23c5cb))
+* overhaul extension to work as a kysely driver to enable plugins and a more fluent qpi ([60d8040](https://github.com/eoin-obrien/prisma-extension-kysely/commit/60d8040f756e46b64edd1cc2f0eac3f4d2b5fe0d)), closes [#29](https://github.com/eoin-obrien/prisma-extension-kysely/issues/29)
+
 ## [1.0.4](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v1.0.3...v1.0.4) (2024-01-17)
 
 
