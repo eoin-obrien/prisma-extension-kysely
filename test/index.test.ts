@@ -148,7 +148,42 @@ describe("prisma-extension-kysely", () => {
     );
   });
 
-  it("should throw an error if a transaction is started", async () => {
+  it("should expose kysely inside a Prisma transaction", async () => {
+    await xprisma.$transaction(async (tx) => {
+      expect(tx.$kysely).toBeInstanceOf(Kysely);
+      expect(tx.$kysely).not.toBe(xprisma.$kysely);
+    });
+  });
+
+  it("should support prisma transactions", async () => {
+    await xprisma.$transaction(async (tx) => {
+      await tx.$kysely.deleteFrom("Model").execute();
+    });
+    await expect(
+      xprisma.$kysely.selectFrom("Model").selectAll().execute(),
+    ).resolves.toHaveLength(0);
+  });
+
+  it("should rollback prisma transactions", async () => {
+    await xprisma
+      .$transaction(async (tx) => {
+        await tx.$kysely.deleteFrom("Model").execute();
+        throw new Error("rollback");
+      })
+      .catch(() => {});
+    await expect(
+      xprisma.$kysely.selectFrom("Model").selectAll().execute(),
+    ).resolves.toHaveLength(1);
+  });
+
+  it("should not interfere with non-interactive transactions", async () => {
+    await xprisma.$transaction([xprisma.model.deleteMany()]);
+    await expect(
+      xprisma.$kysely.selectFrom("Model").selectAll().execute(),
+    ).resolves.toHaveLength(0);
+  });
+
+  it("should forbid the use of kysely's built-in transactions", async () => {
     await expect(
       xprisma.$kysely.transaction().execute(async () => {}),
     ).rejects.toThrow("prisma-extension-kysely does not support transactions");
