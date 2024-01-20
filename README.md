@@ -99,6 +99,31 @@ const result = await query.execute();
 await prisma.$kysely.deleteFrom("User").where("id", "=", id).execute();
 ```
 
+## Transactions
+
+Prisma's interactive transactions are fully supported by `prisma-extension-kysely`! Just remeber to use `tx.$kysely` instead of `prisma.$kysely`, and you're good to go:
+
+```typescript
+await prisma.$transaction(async (tx) => {
+  await tx.$kysely
+    .insertInto("User")
+    .values({ id: 1, name: "John Doe" })
+    .execute();
+
+  await tx.$kysely
+    .insertInto("User")
+    .values({ id: 2, name: "Jane Doe" })
+    .execute();
+});
+```
+
+Don't try to use Kysely's `transaction` method directly, though. It's not supported by `prisma-extension-kysely`, and it will throw an error if you try to use it.
+
+```typescript
+// Don't do this! Prefer prisma.$transaction instead.
+await prisma.$kysely.transaction().execute(async (trx) => {});
+```
+
 ## Plugins
 
 Do you love Kysely's plugins? So do we! You can use them with `prisma-extension-kysely` as well:
