@@ -74,7 +74,9 @@ const prisma = new PrismaClient().$extends(
           createIntrospector: (db) => new PostgresIntrospector(db),
           createQueryCompiler: () => new PostgresQueryCompiler(),
         },
-        plugins: [new CamelCasePlugin()],
+        plugins: [
+          // Add your favorite plugins here!
+        ],
       }),
   }),
 );
