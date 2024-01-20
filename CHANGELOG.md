@@ -6,6 +6,7 @@
 ### ⚠ BREAKING CHANGES
 
 * Remove the $kyselyQuery and $kyselyExecute methods.
+* Change the way the extension is initialized.
 
 ### Features
 
