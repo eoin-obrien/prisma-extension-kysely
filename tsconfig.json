@@ -10,7 +10,7 @@
     "skipDefaultLibCheck": true,
     "skipLibCheck": false,
     "declaration": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
 }
