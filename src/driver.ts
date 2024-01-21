@@ -11,18 +11,18 @@ export class PrismaDriver<T extends PrismaClient> implements Driver {
     return new PrismaConnection(this.prisma);
   }
 
-  beginTransaction(
+  async beginTransaction(
     _connection: DatabaseConnection,
     _settings: TransactionSettings,
   ): Promise<void> {
     throw new Error("prisma-extension-kysely does not support transactions");
   }
 
-  commitTransaction(_connection: DatabaseConnection): Promise<void> {
+  async commitTransaction(_connection: DatabaseConnection): Promise<void> {
     throw new Error("prisma-extension-kysely does not support transactions");
   }
 
-  rollbackTransaction(_connection: DatabaseConnection): Promise<void> {
+  async rollbackTransaction(_connection: DatabaseConnection): Promise<void> {
     throw new Error("prisma-extension-kysely does not support transactions");
   }
 
