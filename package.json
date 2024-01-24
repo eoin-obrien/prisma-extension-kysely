@@ -29,8 +29,9 @@
     "mysql",
     "sqlite"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
   "files": [
     "dist"
   ],
@@ -40,7 +41,7 @@
     "test:watch": "npm run test -- --watch",
     "test:coverage": "npm run test -- --coverage",
     "clean": "rm -rf ./dist",
-    "build": "tsc",
+    "build": "tsc && tsc -p tsconfig.esm.json",
     "prepack": "npm run clean && npm run build",
     "prepare": "husky install",
     "commit": "git-cz",

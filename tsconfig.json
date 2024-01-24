@@ -10,7 +10,7 @@
     "skipDefaultLibCheck": true,
     "skipLibCheck": false,
     "declaration": true,
-    "outDir": "./dist",
+    "outDir": "./dist/cjs",
   },
   "include": ["src/**/*.ts"],
 }
