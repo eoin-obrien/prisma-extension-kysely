@@ -8,9 +8,13 @@
   },
   "description": "Prisma extension for Kysely",
   "license": "MIT",
+  "homepage": "https://github.com/eoin-obrien/prisma-extension-kysely#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/eoin-obrien/prisma-extension-kysely"
+  },
+  "bugs": {
+    "url": "https://github.com/eoin-obrien/prisma-extension-kysely/issues"
   },
   "keywords": [
     "prisma",
