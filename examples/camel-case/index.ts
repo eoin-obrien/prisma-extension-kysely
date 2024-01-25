@@ -6,7 +6,7 @@ import {
   SqliteIntrospector,
   SqliteQueryCompiler,
 } from "kysely";
-import kyselyExtension from "../../dist";
+import kyselyExtension from "../../dist/esm";
 import type { DB } from "./prisma/generated/types";
 
 const prismaClient = new PrismaClient();

@@ -29,19 +29,38 @@
     "mysql",
     "sqlite"
   ],
+  "type": "module",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      },
+      "default": "./dist/cjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "pretest": "npm run build && prisma db push",
+    "pretest": "prisma db push",
     "test": "jest",
     "test:watch": "npm run test -- --watch",
     "test:coverage": "npm run test -- --coverage",
-    "clean": "rm -rf ./dist",
-    "build": "tsc && tsc -p tsconfig.esm.json",
+    "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+    "build:clean": "rm -rf ./dist",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:dual-package": "tsconfig-to-dual-package tsconfig.esm.json tsconfig.cjs.json",
+    "build": "npm run build:clean && npm run build:esm && npm run build:cjs && npm run build:dual-package",
     "prepack": "npm run clean && npm run build",
     "prepare": "husky install",
     "commit": "git-cz",
@@ -77,6 +96,7 @@
     "prisma": "latest",
     "prisma-kysely": "^1.7.1",
     "ts-jest": "^29.1.1",
+    "tsconfig-to-dual-package": "^1.2.0",
     "typescript": "^5.0.0"
   }
 }

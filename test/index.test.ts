@@ -170,7 +170,7 @@ describe("prisma-extension-kysely", () => {
         await tx.$kysely.deleteFrom("Model").execute();
         throw new Error("rollback");
       })
-      .catch(() => {});
+      .catch(() => { });
     await expect(
       xprisma.$kysely.selectFrom("Model").selectAll().execute(),
     ).resolves.toHaveLength(1);
@@ -185,7 +185,7 @@ describe("prisma-extension-kysely", () => {
 
   it("should forbid the use of kysely's built-in transactions", async () => {
     await expect(
-      xprisma.$kysely.transaction().execute(async () => {}),
+      xprisma.$kysely.transaction().execute(async () => { }),
     ).rejects.toThrow("prisma-extension-kysely does not support transactions");
   });
 
