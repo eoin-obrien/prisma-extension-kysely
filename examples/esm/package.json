@@ -1,7 +1,8 @@
 {
   "name": "example",
+  "type": "module",
   "scripts": {
-    "dev": "ts-node index.ts"
+    "dev": "node --loader ts-node/esm index.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",

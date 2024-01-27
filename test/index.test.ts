@@ -10,8 +10,8 @@ import {
   SqliteQueryCompiler,
   UpdateResult,
 } from "kysely";
-import { DB } from "../prisma/generated/types";
-import kyselyExtension from "../src";
+import { DB } from "../prisma/generated/types.js";
+import kyselyExtension from "../src/index.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 

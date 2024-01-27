@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Prisma } from "@prisma/client";
 import { Kysely } from "kysely";
-import { PrismaDriver } from "./driver";
+import { PrismaDriver } from "./driver.js";
 
 /**
  * The configuration object for the Prisma Kysely extension
