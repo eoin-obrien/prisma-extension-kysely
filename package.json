@@ -58,7 +58,7 @@
     "build:clean": "rm -rf ./dist",
     "build:compile": "tsc -b tsconfig.json tsconfig.cjs.json && tsconfig-to-dual-package",
     "build": "npm run build:clean && npm run build:compile",
-    "prepack": "npm run clean && npm run build",
+    "prepack": "npm run build",
     "prepare": "husky install",
     "commit": "git-cz",
     "lint": "eslint .",
