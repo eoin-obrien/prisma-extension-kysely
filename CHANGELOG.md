@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v2.0.0...v2.1.0) (2024-01-27)
+
+
+### Features
+
+* add support for esm builds ([74b77cf](https://github.com/eoin-obrien/prisma-extension-kysely/commit/74b77cf5e1ef944b861d328e3bf1c5cdf8b997bc)), closes [#43](https://github.com/eoin-obrien/prisma-extension-kysely/issues/43)
+* configure dual package build with esm and cjs ([a05391a](https://github.com/eoin-obrien/prisma-extension-kysely/commit/a05391a0938badb3295fc1ce4980f86a73ca88b0))
+
 ## [2.0.0](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v1.0.4...v2.0.0) (2024-01-20)
 
 
