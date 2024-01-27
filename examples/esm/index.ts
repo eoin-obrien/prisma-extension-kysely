@@ -6,7 +6,7 @@ import {
   SqliteQueryCompiler,
 } from "kysely";
 import kyselyExtension from "prisma-extension-kysely";
-import type { DB } from "./prisma/generated/types";
+import type { DB } from "./prisma/generated/types.js";
 
 const prisma = new PrismaClient().$extends(
   kyselyExtension({
