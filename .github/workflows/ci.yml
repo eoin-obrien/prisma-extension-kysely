@@ -90,7 +90,7 @@ jobs:
             run: |
               #!/bin/bash
               for dir in examples/*; do
-                if [ -d "$dir" ]; then
+                if [[ -d "$dir" ]]; then
                   echo "Running example in $dir..."
                   pushd "$dir"
                   npm install
