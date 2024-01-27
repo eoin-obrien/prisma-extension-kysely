@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/prisma-extension-kysely.svg)](https://badge.fury.io/js/prisma-extension-kysely)
 [![npm downloads](https://img.shields.io/npm/dm/prisma-extension-kysely.svg)](https://www.npmjs.com/package/prisma-extension-kysely)
 [![GitHub license](https://img.shields.io/github/license/eoin-obrien/prisma-extension-kysely.svg)](https://www.npmjs.com/package/prisma-extension-kysely)
-[![Node.js CI](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/node.js.yml/badge.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/ci.yml)
+[![Node.js CI](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/ci.yml/badge.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/ci.yml)
 [![Node.js Package](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/npm-publish.yml)
 [![codecov](https://codecov.io/gh/eoin-obrien/prisma-extension-kysely/graph/badge.svg?token=C18C7BGISJ)](https://codecov.io/gh/eoin-obrien/prisma-extension-kysely)
 [![Maintainability](https://api.codeclimate.com/v1/badges/241b8b2b35abafc8af6e/maintainability)](https://codeclimate.com/github/eoin-obrien/prisma-extension-kysely/maintainability)
