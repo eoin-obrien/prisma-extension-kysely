@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { TransactionSettings } from "kysely";
-import { PrismaConnection } from "../src/connection";
-import { PrismaDriver } from "../src/driver";
+import { PrismaConnection } from "../src/connection.js";
+import { PrismaDriver } from "../src/driver.js";
 
 describe("PrismaDriver", () => {
   const prisma = new PrismaClient();

@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client/extension";
+import type { PrismaClient } from "@prisma/client/extension";
 import { DatabaseConnection, Driver, TransactionSettings } from "kysely";
-import { PrismaConnection } from "./connection";
+import { PrismaConnection } from "./connection.js";
 
 export class PrismaDriver<T extends PrismaClient> implements Driver {
   constructor(private readonly prisma: T) {}
