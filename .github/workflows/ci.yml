@@ -70,3 +70,36 @@ jobs:
       - name: Validate PR commits with commitlint
         if: github.event_name == 'pull_request'
         run: npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+  examples:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm run test:coverage
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Run examples
+        run: |
+          #!/bin/bash
+          - name: Run examples
+            run: |
+              #!/bin/bash
+              for dir in examples/*; do
+                if [ -d "$dir" ]; then
+                  echo "Running example in $dir..."
+                  pushd "$dir"
+                  npm install
+                  npm run dev
+                  popd
+                fi
+              done
