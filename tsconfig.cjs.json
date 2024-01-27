@@ -3,6 +3,7 @@
   "compilerOptions": {
     "lib": ["ES2020", "DOM"],
     "module": "CommonJS",
+    "moduleResolution": "Node",
     "target": "ES6",
     "outDir": "dist/cjs"
   },

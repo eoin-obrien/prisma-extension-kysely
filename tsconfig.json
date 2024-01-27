@@ -1,16 +1,20 @@
 {
   "compilerOptions": {
+    "lib": ["ES2020", "DOM"],
+    "module": "ES2022",
+    "moduleResolution": "Node",
+    "target": "ES6",
+    "outDir": "dist/esm",
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "moduleResolution": "node",
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strict": true,
     "allowJs": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts"]
 }
