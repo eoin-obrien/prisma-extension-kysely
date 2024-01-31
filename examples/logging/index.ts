@@ -11,29 +11,29 @@ import type { DB } from "./prisma/generated/types.js";
 const basePrisma = new PrismaClient({
   log: [
     {
-      emit: 'event',
-      level: 'query',
+      emit: "event",
+      level: "query",
     },
     {
-      emit: 'stdout',
-      level: 'error',
+      emit: "stdout",
+      level: "error",
     },
     {
-      emit: 'stdout',
-      level: 'info',
+      emit: "stdout",
+      level: "info",
     },
     {
-      emit: 'stdout',
-      level: 'warn',
+      emit: "stdout",
+      level: "warn",
     },
   ],
-})
+});
 
-basePrisma.$on('query', (e) => {
-  console.log('Query: ' + e.query)
-  console.log('Params: ' + e.params)
-  console.log('Duration: ' + e.duration + 'ms')
-})
+basePrisma.$on("query", (e) => {
+  console.log("Query: " + e.query);
+  console.log("Params: " + e.params);
+  console.log("Duration: " + e.duration + "ms");
+});
 
 const prisma = basePrisma.$extends(
   kyselyExtension({
