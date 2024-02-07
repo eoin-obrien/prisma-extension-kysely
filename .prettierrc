@@ -1,1 +1,10 @@
-{}
+{
+  "overrides": [
+    {
+      "files": ["tsconfig.json", "jsconfig.json"],
+      "options": {
+        "parser": "jsonc"
+      }
+    }
+  ]
+}
