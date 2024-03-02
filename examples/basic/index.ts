@@ -34,17 +34,21 @@ async function main() {
   console.log("Deleted users:", Number(deletedUsers.numDeletedRows));
 
   // Create and update a user
-  const [insertedUser] = await prisma.$kysely
-    .insertInto("User")
-    .values({ name: "John", email: "john@prisma.io" })
-    .returningAll()
-    .execute();
-  const affectedRows = await prisma.$kysely
-    .updateTable("User")
-    .set({ name: "John Doe" })
-    .where("id", "=", insertedUser.id)
-    .executeTakeFirstOrThrow();
-  console.log("Updated users:", Number(affectedRows.numUpdatedRows));
+  const insertedUser = await prisma.$transaction(async (tx) => {
+    const [insertedUser] = await tx.$kysely
+      .insertInto("User")
+      .values({ name: "John", email: "john@prisma.io" })
+      .returningAll()
+      .execute();
+    const affectedRows = await tx.$kysely
+      .updateTable("User")
+      .set({ name: "John Doe" })
+      .where("id", "=", insertedUser.id)
+      .executeTakeFirstOrThrow();
+    console.log("Updated users:", Number(affectedRows.numUpdatedRows));
+
+    return insertedUser;
+  });
 
   // Create a post
   await prisma.$kysely
