@@ -7,12 +7,20 @@ import {
   QueryResult,
   UpdateQueryNode,
 } from "kysely";
+import { PrismaKyselyExtensionDriverConfig } from "./driver.js";
 
 /**
  * A Kysely database connection that uses Prisma as the driver
  */
 export class PrismaConnection implements DatabaseConnection {
-  constructor(private readonly prisma: PrismaClient) {}
+  protected config: PrismaKyselyExtensionDriverConfig = {};
+
+  constructor(
+    private readonly prisma: PrismaClient,
+    config: PrismaKyselyExtensionDriverConfig = {},
+  ) {
+    this.config = config;
+  }
 
   async executeQuery<R>(
     compiledQuery: CompiledQuery<unknown>,
@@ -39,7 +47,13 @@ export class PrismaConnection implements DatabaseConnection {
     }
 
     // Otherwise, execute it with $queryRawUnsafe to get the query results
-    const rows = await this.prisma.$queryRawUnsafe(sql, ...parameters);
+    const instance = this.config.withReadReplica
+      ? supportsReturning
+        ? this.prisma.$primary()
+        : this.prisma.$replica()
+      : this.prisma;
+
+    const rows = await instance.$queryRawUnsafe(sql, ...parameters);
     return { rows };
   }
 

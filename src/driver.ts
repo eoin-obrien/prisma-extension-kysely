@@ -2,13 +2,28 @@ import type { PrismaClient } from "@prisma/client/extension";
 import { DatabaseConnection, Driver, TransactionSettings } from "kysely";
 import { PrismaConnection } from "./connection.js";
 
+export type PrismaKyselyExtensionDriverConfig = {
+  /**
+   * Use a read replica for read queries when enabled
+   * @see @prisma/extension-read-replicas
+   */
+  withReadReplica?: boolean;
+};
+
 export class PrismaDriver<T extends PrismaClient> implements Driver {
-  constructor(private readonly prisma: T) {}
+  protected config: PrismaKyselyExtensionDriverConfig = {};
+
+  constructor(
+    private readonly prisma: T,
+    config: PrismaKyselyExtensionDriverConfig = {},
+  ) {
+    this.config = config;
+  }
 
   async init(): Promise<void> {}
 
   async acquireConnection(): Promise<DatabaseConnection> {
-    return new PrismaConnection(this.prisma);
+    return new PrismaConnection(this.prisma, this.config);
   }
 
   async beginTransaction(

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Prisma } from "@prisma/client";
 import { Kysely } from "kysely";
-import { PrismaDriver } from "./driver.js";
+import { PrismaDriver, PrismaKyselyExtensionDriverConfig } from "./driver.js";
 
 /**
  * The configuration object for the Prisma Kysely extension
@@ -11,16 +11,22 @@ export type PrismaKyselyExtensionArgs<Database> = {
    * The Kysely instance to provide to the Prisma client
    */
   // kysely: Kysely<Database>;
-  kysely: (driver: PrismaDriver<any>) => Kysely<Database>;
+  kysely: (
+    driver: PrismaDriver<any>,
+    config?: PrismaKyselyExtensionDriverConfig,
+  ) => Kysely<Database>;
 };
 
 /**
  * Define a Prisma extension that adds Kysely query builder methods to the Prisma client
  * @param extensionArgs The extension configuration object
  */
-export default <Database>(extensionArgs: PrismaKyselyExtensionArgs<Database>) =>
+export default <Database>(
+  extensionArgs: PrismaKyselyExtensionArgs<Database>,
+  config = {},
+) =>
   Prisma.defineExtension((client) => {
-    const driver = new PrismaDriver(client);
+    const driver = new PrismaDriver(client, config);
     const kysely = extensionArgs.kysely(driver);
 
     const extendedClient = client.$extends({
