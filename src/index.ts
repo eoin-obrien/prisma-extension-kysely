@@ -11,8 +11,15 @@ export type PrismaKyselyExtensionArgs<Database> = {
    * The Kysely instance to provide to the Prisma client
    */
   // kysely: Kysely<Database>;
-  kysely: (driver: PrismaDriver<any>) => Kysely<Database>;
+  kysely: (driver: PrismaDriver<unknown>) => Kysely<Database>;
 };
+
+export class PrismaKyselyExtensionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PrismaKyselyExtensionError";
+  }
+}
 
 /**
  * Define a Prisma extension that adds Kysely query builder methods to the Prisma client
@@ -20,6 +27,13 @@ export type PrismaKyselyExtensionArgs<Database> = {
  */
 export default <Database>(extensionArgs: PrismaKyselyExtensionArgs<Database>) =>
   Prisma.defineExtension((client) => {
+    // Check if the client is already extended
+    if ("$kysely" in client) {
+      throw new PrismaKyselyExtensionError(
+        "The Prisma client is already extended with Kysely",
+      );
+    }
+
     const driver = new PrismaDriver(client);
     const kysely = extensionArgs.kysely(driver);
 
