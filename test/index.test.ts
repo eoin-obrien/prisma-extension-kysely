@@ -10,6 +10,7 @@ import {
   SqliteQueryCompiler,
   UpdateResult,
 } from "kysely";
+import { readReplicas } from "@prisma/extension-read-replicas";
 import { DB } from "../prisma/generated/types.js";
 import kyselyExtension from "../src/index.js";
 
@@ -206,5 +207,44 @@ describe("prisma-extension-kysely", () => {
     expect(plugin.transformResult).toHaveBeenCalledWith(
       expect.objectContaining({ result: { rows } }),
     );
+  });
+
+  describe("@prisma/extension-read-replicas", () => {
+    const replica = new PrismaClient().$extends(
+      kyselyExtension({
+        kysely: (driver) =>
+          new Kysely<DB>({
+            dialect: {
+              createAdapter: () => new SqliteAdapter(),
+              createDriver: () => driver,
+              createIntrospector: (db) => new SqliteIntrospector(db),
+              createQueryCompiler: () => new SqliteQueryCompiler(),
+            },
+          }),
+      }),
+    );
+
+    const prismaWithReplica = xprisma.$extends(
+      readReplicas({
+        replicas: [replica],
+      }),
+    );
+
+    it("should provide the base Kysely instance to the primary client", async () => {
+      expect(prismaWithReplica.$primary().$kysely).toBeInstanceOf(Kysely);
+      expect(prismaWithReplica.$primary().$kysely).toBe(
+        prismaWithReplica.$kysely,
+      );
+    });
+
+    it("should provide the a different Kysely instance to the replica client", async () => {
+      expect(prismaWithReplica.$replica().$kysely).toBeInstanceOf(Kysely);
+      expect(prismaWithReplica.$replica().$kysely).not.toBe(
+        prismaWithReplica.$kysely,
+      );
+      expect(prismaWithReplica.$replica().$kysely).not.toBe(
+        prismaWithReplica.$primary().$kysely,
+      );
+    });
   });
 });

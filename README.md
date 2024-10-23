@@ -160,6 +160,57 @@ generator kysely {
 
 Take a look at [the camel case example](examples/camel-case/) to see it in action! Check out the [Kysely documentation](https://kysely.dev/) for more information about plugins.
 
+## Read Replicas
+
+Using read replicas with `prisma-extension-kysely` is a breeze!
+Just use the excellent [`@prisma/extension-read-replicas`](https://www.npmjs.com/package/@prisma/extension-read-replicas) extension as normal.
+Pay attention to how it's configured, though:
+
+```typescript
+// Use a common config for primary and replica clients (or different configs)
+const kyselyExtensionArgs: PrismaKyselyExtensionArgs<DB> = {
+  kysely: (driver) =>
+    new Kysely<DB>({
+      dialect: {
+        createAdapter: () => new SqliteAdapter(),
+        createDriver: () => driver,
+        createIntrospector: (db) => new SqliteIntrospector(db),
+        createQueryCompiler: () => new SqliteQueryCompiler(),
+      },
+    }),
+};
+
+// Initialize the replica client(s) and add the Kysely extension
+const replicaClient = new PrismaClient({
+  datasourceUrl: "YOUR_REPLICA_URL", // Replace this with your replica's URL!
+  log: [{ level: "query", emit: "event" }],
+}).$extends(kyselyExtension(kyselyExtensionArgs));
+
+// Initialize the primary client and add the Kysely extension and the read replicas extension
+const prisma = new PrismaClient()
+  .$extends(kyselyExtension(kyselyExtensionArgs)) // Apply the Kysely extension before the read replicas extension!
+  .$extends(
+    readReplicas({
+      replicas: [replicaClient],
+    }),
+  ); // Apply the read replicas extension after the Kysely extension!
+```
+
+See how we're setting up the replica client as a fully-fledged Prisma client and extending it separately? That's the secret sauce!
+It make sure that the replica client has a separate Kysely instance. If you try to use bare URLs, you'll run into trouble;
+it'll share the same Kysely instance as the primary client, and you'll get unpleasant surprises!
+
+```typescript
+// Don't do this! It won't work as expected.
+readReplicas({
+  url: "postgresql://user:password@localhost:5432/dbname",
+});
+```
+
+Also, note that we're applying the Kysely extension before the read replicas extension. This is important! If you apply the read replicas extension first, you won't get `.$kysely` on the primary client.
+
+Check out the [read replicas example](examples/read-replicas/) for a runnable example!
+
 ## Examples
 
 Check out the [examples](examples) directory for a sample project!
