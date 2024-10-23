@@ -1,0 +1,5 @@
+# Generated files
+prisma/generated
+
+# Prisma local database file
+prisma/dev.db
