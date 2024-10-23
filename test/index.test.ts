@@ -14,9 +14,8 @@ import { readReplicas } from "@prisma/extension-read-replicas";
 import { DB } from "../prisma/generated/types.js";
 import kyselyExtension from "../src/index.js";
 
-describe("prisma-extension-kysely", () => {
-  const prisma = new PrismaClient();
-  const xprisma = prisma.$extends(
+function withKysely(client: PrismaClient) {
+  return client.$extends(
     kyselyExtension({
       kysely: (driver) =>
         new Kysely<DB>({
@@ -29,6 +28,16 @@ describe("prisma-extension-kysely", () => {
         }),
     }),
   );
+}
+
+async function expectModelCount(client: PrismaClient, count: number) {
+  const models = await client.model.findMany();
+  expect(models).toHaveLength(count);
+}
+
+describe("prisma-extension-kysely", () => {
+  const prisma = new PrismaClient();
+  const xprisma = withKysely(prisma);
 
   const $queryRawUnsafeSpy = jest.spyOn(prisma, "$queryRawUnsafe");
   const $executeRawUnsafeSpy = jest.spyOn(prisma, "$executeRawUnsafe");
@@ -158,9 +167,7 @@ describe("prisma-extension-kysely", () => {
     await xprisma.$transaction(async (tx) => {
       await tx.$kysely.deleteFrom("Model").execute();
     });
-    await expect(
-      xprisma.$kysely.selectFrom("Model").selectAll().execute(),
-    ).resolves.toHaveLength(0);
+    await expectModelCount(prisma, 0);
   });
 
   it("should rollback prisma transactions", async () => {
@@ -170,16 +177,12 @@ describe("prisma-extension-kysely", () => {
         throw new Error("rollback");
       })
       .catch(() => {});
-    await expect(
-      xprisma.$kysely.selectFrom("Model").selectAll().execute(),
-    ).resolves.toHaveLength(1);
+    await expectModelCount(prisma, 1);
   });
 
   it("should not interfere with non-interactive transactions", async () => {
     await xprisma.$transaction([xprisma.model.deleteMany()]);
-    await expect(
-      xprisma.$kysely.selectFrom("Model").selectAll().execute(),
-    ).resolves.toHaveLength(0);
+    await expectModelCount(prisma, 0);
   });
 
   it("should forbid the use of kysely's built-in transactions", async () => {
@@ -226,19 +229,7 @@ describe("prisma-extension-kysely", () => {
   });
 
   describe("@prisma/extension-read-replicas", () => {
-    const replica = new PrismaClient().$extends(
-      kyselyExtension({
-        kysely: (driver) =>
-          new Kysely<DB>({
-            dialect: {
-              createAdapter: () => new SqliteAdapter(),
-              createDriver: () => driver,
-              createIntrospector: (db) => new SqliteIntrospector(db),
-              createQueryCompiler: () => new SqliteQueryCompiler(),
-            },
-          }),
-      }),
-    );
+    const replica = withKysely(new PrismaClient());
 
     const prismaWithReplica = xprisma.$extends(
       readReplicas({
