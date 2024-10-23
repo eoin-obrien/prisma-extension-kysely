@@ -75,9 +75,9 @@
     "@prisma/client": "latest"
   },
   "devDependencies": {
-    "@commitlint/cli": "^18.4.3",
-    "@commitlint/config-conventional": "^18.4.3",
-    "@commitlint/cz-commitlint": "^18.4.3",
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@commitlint/cz-commitlint": "^19.0.0",
     "@prisma/client": "latest",
     "@prisma/extension-read-replicas": "^0.4.0",
     "@types/jest": "^29.5.10",
