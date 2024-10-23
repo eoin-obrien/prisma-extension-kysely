@@ -14,8 +14,6 @@ import { readReplicas } from "@prisma/extension-read-replicas";
 import { DB } from "../prisma/generated/types.js";
 import kyselyExtension from "../src/index.js";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-
 describe("prisma-extension-kysely", () => {
   const prisma = new PrismaClient();
   const xprisma = prisma.$extends(
