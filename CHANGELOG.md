@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.0.0](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v2.1.0...v3.0.0) (2024-10-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* This change introduces an error where previously there was none, which may affect existing code that accidentally extended the Prisma client multiple times.
+
+### Features
+
+* throw error if Prisma client is already extended with Kysely ([e05b789](https://github.com/eoin-obrien/prisma-extension-kysely/commit/e05b789de80073d189b12457c8614837d56c8e17))
+* throw error if Prisma client is already extended with Kysely ([f826055](https://github.com/eoin-obrien/prisma-extension-kysely/commit/f8260559fdddf28a3d587e10d6cff25fe38467a4))
+
 ## [2.1.0](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v2.0.0...v2.1.0) (2024-01-27)
 
 
