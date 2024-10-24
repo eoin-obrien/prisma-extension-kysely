@@ -211,21 +211,9 @@ describe("prisma-extension-kysely", () => {
   });
 
   it("should throw an error if the Prisma client is already extended with Kysely", async () => {
-    expect(() =>
-      xprisma.$extends(
-        kyselyExtension({
-          kysely: (driver) =>
-            new Kysely<DB>({
-              dialect: {
-                createAdapter: () => new SqliteAdapter(),
-                createDriver: () => driver,
-                createIntrospector: (db) => new SqliteIntrospector(db),
-                createQueryCompiler: () => new SqliteQueryCompiler(),
-              },
-            }),
-        }),
-      ),
-    ).toThrow("The Prisma client is already extended with Kysely");
+    expect(() => withKysely(xprisma as any)).toThrow(
+      "The Prisma client is already extended with Kysely",
+    );
   });
 
   describe("@prisma/extension-read-replicas", () => {
