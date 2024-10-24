@@ -211,7 +211,7 @@ describe("prisma-extension-kysely", () => {
   });
 
   it("should throw an error if the Prisma client is already extended with Kysely", async () => {
-    expect(() => withKysely(xprisma as any)).toThrow(
+    expect(() => withKysely(xprisma as unknown as PrismaClient)).toThrow(
       "The Prisma client is already extended with Kysely",
     );
   });
