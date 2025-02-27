@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client/extension";
 import { Kysely } from "kysely";
 import { PrismaDriver } from "./driver.js";
 
