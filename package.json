@@ -92,7 +92,7 @@
     "jest": "^30.0.0",
     "jest-mock-extended": "^4.0.0",
     "kysely": "^0.27.0",
-    "prettier": "3.5.3",
+    "prettier": "3.6.0",
     "prisma": "latest",
     "prisma-kysely": "^1.7.1",
     "ts-jest": "^29.1.1",
