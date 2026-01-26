@@ -1,4 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "./prisma/generated/prisma/client.js";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import Database from "better-sqlite3";
 import {
   Kysely,
   SqliteAdapter,
@@ -24,15 +26,22 @@ const kyselyExtensionArgs: PrismaKyselyExtensionArgs<DB> = {
     }),
 };
 
+// Create driver adapters for primary and replica
+const primaryDb = new Database("prisma/dev.db");
+const primaryAdapter = new PrismaBetterSqlite3(primaryDb);
+
+// For demonstration purposes, use the same SQLite database for replica
+const replicaDb = new Database("prisma/dev.db");
+const replicaAdapter = new PrismaBetterSqlite3(replicaDb);
+
 // Initialize the replica client(s) and add the Kysely extension
 const replicaClient = new PrismaClient({
-  // For demonstration purposes, use the same SQLite database
-  datasourceUrl: "file:./dev.db",
+  adapter: replicaAdapter,
   log: [{ level: "query", emit: "event" }],
 }).$extends(kyselyExtension(kyselyExtensionArgs));
 
 // Initialize the primary client and add the Kysely extension
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({ adapter: primaryAdapter })
   .$extends(kyselyExtension(kyselyExtensionArgs))
   .$extends(
     readReplicas({
