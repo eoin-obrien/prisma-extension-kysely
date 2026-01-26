@@ -8,6 +8,8 @@
 [![codecov](https://codecov.io/gh/eoin-obrien/prisma-extension-kysely/graph/badge.svg?token=C18C7BGISJ)](https://codecov.io/gh/eoin-obrien/prisma-extension-kysely)
 [![Maintainability](https://api.codeclimate.com/v1/badges/241b8b2b35abafc8af6e/maintainability)](https://codeclimate.com/github/eoin-obrien/prisma-extension-kysely/maintainability)
 
+> **Note:** Version 4.x requires **Prisma 7** or later. For Prisma 5/6, use version 3.x.
+
 Writing and maintaining raw SQL queries for Prisma can be a tedious and error-prone task. The moment you need to write a query that is not supported out-of-the-box by Prisma, you lose all of that type-safety and autocompletion. This is where `prisma-extension-kysely` comes in! It allows you to easily write raw SQL queries in a type-safe manner with [`kysely`](https://kysely.dev/) and integrate them seamlessly with Prisma.
 
 And the best part? You can use all of your favorite [`kysely`](https://kysely.dev/) plugins with `prisma-extension-kysely` too!
@@ -29,12 +31,20 @@ You don't have to take our word for it, though:
 
 ## Get started
 
+> **Prisma 7 Required:** This version requires Prisma 7's new driver adapter architecture. See the [migration guide](#migrating-from-prisma-56-to-prisma-7) below if upgrading.
+
 Click the **Use this template** button and provide details for your Client extension
 
 Install the dependencies:
 
 ```shell
 npm install prisma-extension-kysely kysely
+```
+
+Install a driver adapter for your database (e.g., for PostgreSQL):
+
+```shell
+npm install @prisma/adapter-pg
 ```
 
 Set up the excellent [`prisma-kysely`](https://www.npmjs.com/package/prisma-kysely) library to automatically generate types for your database:
@@ -46,9 +56,34 @@ npm install -D prisma-kysely
 Add `prisma-kysely` as a generator to your `schema.prisma`:
 
 ```prisma
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
 generator kysely {
   provider = "prisma-kysely"
+  output   = "./generated"
+  fileName = "types.ts"
 }
+
+datasource db {
+  provider = "postgresql"
+}
+```
+
+Create a `prisma.config.ts` file in your project root:
+
+```typescript
+import "dotenv/config";
+import { defineConfig } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  datasource: {
+    url: process.env.DATABASE_URL,
+  },
+});
 ```
 
 Generate the types:
@@ -60,10 +95,21 @@ npx prisma generate
 Extend your Prisma Client:
 
 ```typescript
+import { PrismaClient } from "./prisma/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import {
+  Kysely,
+  PostgresAdapter,
+  PostgresIntrospector,
+  PostgresQueryCompiler,
+} from "kysely";
 import kyselyExtension from "prisma-extension-kysely";
 import type { DB } from "./prisma/generated/types";
 
-const prisma = new PrismaClient().$extends(
+// Create the driver adapter
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+
+const prisma = new PrismaClient({ adapter }).$extends(
   kyselyExtension({
     kysely: (driver) =>
       new Kysely<DB>({
@@ -230,3 +276,100 @@ npm run dev
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Migrating from Prisma 5/6 to Prisma 7
+
+Version 4.x of `prisma-extension-kysely` requires Prisma 7, which introduces significant breaking changes. Here's how to migrate:
+
+### 1. Update dependencies
+
+```shell
+npm install @prisma/client@7 prisma-extension-kysely@4
+npm install -D prisma@7 prisma-kysely@3
+```
+
+### 2. Install a driver adapter
+
+Prisma 7 requires a driver adapter for your database:
+
+```shell
+# PostgreSQL
+npm install @prisma/adapter-pg
+
+# MySQL
+npm install @prisma/adapter-mysql
+
+# SQLite
+npm install @prisma/adapter-better-sqlite3
+```
+
+### 3. Update your Prisma schema
+
+```prisma
+// Before (Prisma 5/6)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// After (Prisma 7)
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url is now configured in prisma.config.ts
+}
+```
+
+### 4. Create prisma.config.ts
+
+Create a `prisma.config.ts` file in your project root:
+
+```typescript
+import "dotenv/config";
+import { defineConfig } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  datasource: {
+    url: process.env.DATABASE_URL,
+  },
+});
+```
+
+### 5. Update your client initialization
+
+```typescript
+// Before (Prisma 5/6)
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient().$extends(
+  kyselyExtension({
+    /* ... */
+  }),
+);
+
+// After (Prisma 7)
+import { PrismaClient } from "./prisma/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter }).$extends(
+  kyselyExtension({
+    /* ... */
+  }),
+);
+```
+
+### 6. Regenerate your client
+
+```shell
+npx prisma generate
+```
