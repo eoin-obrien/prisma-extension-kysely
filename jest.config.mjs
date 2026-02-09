@@ -13,6 +13,9 @@ export default {
       },
     ],
   },
+  transformIgnorePatterns: [
+    "node_modules/(?!(@prisma/adapter-better-sqlite3)/)",
+  ],
   testEnvironment: "node",
   testPathIgnorePatterns: [
     "/node_modules/",
@@ -22,4 +25,5 @@ export default {
   ],
   modulePathIgnorePatterns: ["<rootDir>/dist/", "<rootDir>/examples/"],
   workerThreads: true,
+  extensionsToTreatAsEsm: [".ts"],
 };

@@ -1,5 +1,41 @@
 # Changelog
 
+## [4.0.0](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v3.0.0...v4.0.0) (2025-01-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **prisma 7:** This version requires Prisma 7 or later. Prisma 7 introduces a new driver adapter architecture that is incompatible with previous versions.
+
+### Features
+
+* **prisma 7:** add support for Prisma 7 driver adapter architecture
+
+### Migration Guide
+
+To upgrade from v3.x to v4.x:
+
+1. Update dependencies:
+   - `@prisma/client@^7.0.0`
+   - `prisma@^7.0.0`
+   - `prisma-kysely@^3.0.0`
+
+2. Install a driver adapter for your database:
+   - PostgreSQL: `@prisma/adapter-pg`
+   - MySQL: `@prisma/adapter-mysql`
+   - SQLite: `@prisma/adapter-better-sqlite3`
+
+3. Update your Prisma schema:
+   - Change `provider = "prisma-client-js"` to `provider = "prisma-client"`
+   - Add `output = "./generated/prisma"` to the generator block
+   - Remove `url` from datasource (move to `prisma.config.ts`)
+
+4. Create `prisma.config.ts` in your project root
+
+5. Update your client initialization to use driver adapters
+
+See the [README](README.md#migrating-from-prisma-56-to-prisma-7) for detailed migration instructions.
+
 ## [3.0.0](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v2.1.0...v3.0.0) (2024-10-24)
 
 

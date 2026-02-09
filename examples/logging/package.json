@@ -1,16 +1,20 @@
 {
   "name": "example",
+  "type": "module",
   "scripts": {
-    "dev": "ts-node index.ts"
+    "dev": "npx tsx index.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.0.0",
+    "@prisma/adapter-better-sqlite3": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "kysely": "^0.27.0",
     "prisma-extension-kysely": "file:../.."
   },
   "devDependencies": {
-    "prisma": "^5.0.0",
-    "prisma-kysely": "^1.7.1",
-    "ts-node": "^10.9.1",
+    "dotenv": "^16.4.5",
+    "prisma": "^7.0.0",
+    "prisma-kysely": "^3.0.0",
+    "tsx": "^4.0.0",
     "typescript": "^5.0.0"
   }
 }

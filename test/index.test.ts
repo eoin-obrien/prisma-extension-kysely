@@ -1,4 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../prisma/generated/prisma/client.js";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import {
   Compilable,
   DeleteResult,
@@ -13,6 +14,14 @@ import {
 import { readReplicas } from "@prisma/extension-read-replicas";
 import { DB } from "../prisma/generated/types.js";
 import kyselyExtension from "../src/index.js";
+import { jest } from "@jest/globals";
+
+function createPrismaClient() {
+  const adapter = new PrismaBetterSqlite3({
+    url: "file:./prisma/dev.db",
+  });
+  return new PrismaClient({ adapter });
+}
 
 function withKysely(client: PrismaClient) {
   return client.$extends(
@@ -36,7 +45,7 @@ async function expectModelCount(client: PrismaClient, count: number) {
 }
 
 describe("prisma-extension-kysely", () => {
-  const prisma = new PrismaClient();
+  const prisma = createPrismaClient();
   const xprisma = withKysely(prisma);
 
   const $queryRawUnsafeSpy = jest.spyOn(prisma, "$queryRawUnsafe");
@@ -217,7 +226,7 @@ describe("prisma-extension-kysely", () => {
   });
 
   describe("@prisma/extension-read-replicas", () => {
-    const replica = withKysely(new PrismaClient());
+    const replica = withKysely(createPrismaClient());
 
     const prismaWithReplica = xprisma.$extends(
       readReplicas({
