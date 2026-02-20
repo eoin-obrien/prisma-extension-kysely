@@ -91,7 +91,7 @@
     "inquirer": "^8.2.6",
     "jest": "^30.0.0",
     "jest-mock-extended": "^4.0.0",
-    "kysely": "^0.27.0",
+    "kysely": "^0.28.0",
     "prettier": "3.8.1",
     "prisma": "latest",
     "prisma-kysely": "^1.7.1",
