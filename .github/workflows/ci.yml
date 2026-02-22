@@ -10,6 +10,7 @@ on:
 
 env:
   NODE_LTS: "20"
+  HUSKY: "0"
 
 jobs:
   check:
