@@ -1,7 +1,4 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-name: Node.js CI
+name: CI
 
 on:
   push:
@@ -12,87 +9,75 @@ on:
     branches: ["main"]
 
 jobs:
-  build:
+  check:
+    name: Lint & Format
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
       - uses: actions/checkout@v6
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+      - uses: biomejs/setup-biome@v2
+        with:
+          version: latest
+      - run: biome check .
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build
+
+  test:
+    name: Test (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm ci
-      - run: npm run build --if-present
       - run: npm run test:coverage
-      - name: Upload coverage reports to Codecov
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == 20
         uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-      - name: Use Node.js 20
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: "npm"
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run format:check
-
   commitlint:
+    name: Commit Lint
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Use Node.js 20
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: "npm"
-      - run: npm ci
-
-      - name: Validate current commit (last commit) with commitlint
-        if: github.event_name == 'push'
-        run: npx commitlint --from HEAD~1 --to HEAD --verbose
-
-      - name: Validate PR commits with commitlint
-        if: github.event_name == 'pull_request'
-        run: npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
+      - uses: wagoid/commitlint-github-action@v6
 
   examples:
+    name: Examples
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
-      - name: Use Node.js 20
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 20
           cache: "npm"
       - run: npm ci
-      - run: npm run build --if-present
+      - run: npm run build
       - name: Run examples
         run: |
-          #!/bin/bash
-          for dir in examples/*; do
-            if [[ -d "$dir" ]]; then
-              echo "Running example in $dir..."
-              pushd "$dir"
-              npm install
-              npx prisma db push
-              npm run dev
-              popd
-            fi
+          for dir in examples/*/; do
+            echo "Running example in $dir..."
+            cd "$dir"
+            npm install
+            npx prisma db push
+            npm run dev
+            cd -
           done
