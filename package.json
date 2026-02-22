@@ -76,9 +76,9 @@
     "kysely": "^0.27.0 || ^0.28.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^18.4.3",
-    "@commitlint/config-conventional": "^18.4.3",
-    "@commitlint/cz-commitlint": "^18.4.3",
+    "@commitlint/cli": "^20.0.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/cz-commitlint": "^20.0.0",
     "@prisma/client": "^6.0.0",
     "@prisma/extension-read-replicas": "^0.4.1",
     "@types/jest": "^30.0.0",
