@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
+    "kysely": "^0.27.0 || ^0.28.0",
     "prisma-extension-kysely": "file:../.."
   },
   "devDependencies": {
