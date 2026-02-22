@@ -281,6 +281,21 @@ describe("prisma-extension-kysely", () => {
     );
   });
 
+  it("should include the caller's location in the error stack trace", async () => {
+    let thrownError: Error | undefined;
+    try {
+      await xprisma.$kysely
+        .selectFrom("NonExistentTable" as unknown as keyof DB)
+        .selectAll()
+        .execute();
+    } catch (err) {
+      thrownError = err as Error;
+    }
+    expect(thrownError).toBeDefined();
+    expect(thrownError?.stack).toContain("From prisma-extension-kysely:");
+    expect(thrownError?.stack).toContain("SelectQueryBuilderImpl.execute");
+  });
+
   describe("@prisma/extension-read-replicas", () => {
     const replica = withKysely(new PrismaClient());
 
