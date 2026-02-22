@@ -34,7 +34,6 @@ export class PrismaConnection implements DatabaseConnection {
       return {
         rows: [],
         numAffectedRows: numAffectedRows,
-        numUpdatedOrDeletedRows: numAffectedRows,
       };
     }
 

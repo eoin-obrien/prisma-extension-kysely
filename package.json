@@ -72,14 +72,15 @@
     }
   },
   "peerDependencies": {
-    "@prisma/client": "latest"
+    "@prisma/client": "^5.0.0 || ^6.0.0",
+    "kysely": "^0.27.0 || ^0.28.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.4.3",
     "@commitlint/config-conventional": "^18.4.3",
     "@commitlint/cz-commitlint": "^18.4.3",
-    "@prisma/client": "latest",
-    "@prisma/extension-read-replicas": "^0.4.0",
+    "@prisma/client": "^6.0.0",
+    "@prisma/extension-read-replicas": "^0.4.1",
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
@@ -91,11 +92,11 @@
     "inquirer": "^8.2.6",
     "jest": "^30.0.0",
     "jest-mock-extended": "^4.0.0",
-    "kysely": "^0.27.0",
+    "kysely": "^0.28.0",
     "prettier": "3.8.1",
-    "prisma": "latest",
+    "prisma": "^6.0.0",
     "prisma-kysely": "^1.7.1",
-    "ts-jest": "^29.1.1",
+    "ts-jest": "^29.4.0",
     "tsconfig-to-dual-package": "^1.2.0",
     "typescript": "^5.0.0"
   }
