@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client/extension";
+import type { PrismaClient } from "@prisma/client/extension";
 import {
-  CompiledQuery,
-  DatabaseConnection,
+  type CompiledQuery,
+  type DatabaseConnection,
   DeleteQueryNode,
   InsertQueryNode,
-  QueryResult,
+  type QueryResult,
   UpdateQueryNode,
 } from "kysely";
 

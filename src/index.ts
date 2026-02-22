@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { Kysely } from "kysely";
+import type { Kysely } from "kysely";
 import { PrismaDriver } from "./driver.js";
 
 /**

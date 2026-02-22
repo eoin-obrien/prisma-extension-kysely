@@ -4,10 +4,10 @@
     "lib": ["ES2022"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "target": "ES2020",
+    "target": "ES2020"
   },
   "ts-node": {
     "esm": true,
-    "experimentalSpecifierResolution": "node",
-  },
+    "experimentalSpecifierResolution": "node"
+  }
 }
