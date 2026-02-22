@@ -95,7 +95,7 @@
     "kysely": "^0.28.0",
     "prettier": "3.8.1",
     "prisma": "^6.0.0",
-    "prisma-kysely": "^1.7.1",
+    "prisma-kysely": "^3.0.0",
     "ts-jest": "^29.4.0",
     "tsconfig-to-dual-package": "^1.2.0",
     "typescript": "^5.0.0"
