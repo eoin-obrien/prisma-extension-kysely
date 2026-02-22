@@ -185,6 +185,71 @@ describe("prisma-extension-kysely", () => {
     await expectModelCount(prisma, 0);
   });
 
+  it("should see prisma writes in kysely queries within the same transaction", async () => {
+    await xprisma.$transaction(async (tx) => {
+      const created = await tx.model.create({
+        data: { value: "prisma-to-kysely" },
+      });
+      const found = await tx.$kysely
+        .selectFrom("Model")
+        .selectAll()
+        .where("id", "=", created.id)
+        .executeTakeFirst();
+      expect(found).toEqual({ id: created.id, value: "prisma-to-kysely" });
+    });
+  });
+
+  it("should see kysely writes in prisma queries within the same transaction", async () => {
+    await xprisma.$transaction(async (tx) => {
+      await tx.$kysely
+        .insertInto("Model")
+        .values({ value: "kysely-to-prisma" })
+        .execute();
+      const found = await tx.model.findFirst({
+        where: { value: "kysely-to-prisma" },
+      });
+      expect(found).not.toBeNull();
+      expect(found?.value).toBe("kysely-to-prisma");
+    });
+  });
+
+  it("should not pollute the outer kysely instance during a transaction", async () => {
+    const outerKysely = xprisma.$kysely;
+    await xprisma.$transaction(async (tx) => {
+      expect(tx.$kysely).not.toBe(outerKysely);
+    });
+    // The outer instance must be the same object reference after the transaction commits
+    expect(xprisma.$kysely).toBe(outerKysely);
+    // And it must still be functional
+    await expect(
+      xprisma.$kysely.selectFrom("Model").selectAll().execute(),
+    ).resolves.toEqual([testRow]);
+  });
+
+  it("should provide independent kysely instances for concurrent transactions", async () => {
+    const outerKysely = xprisma.$kysely;
+    const instances: Kysely<DB>[] = [];
+
+    await Promise.all([
+      xprisma.$transaction(async (tx) => {
+        instances[0] = tx.$kysely;
+        // Keep connection alive with a read
+        await tx.$kysely.selectFrom("Model").selectAll().execute();
+      }),
+      xprisma.$transaction(async (tx) => {
+        instances[1] = tx.$kysely;
+        await tx.$kysely.selectFrom("Model").selectAll().execute();
+      }),
+    ]);
+
+    // Each transaction must have gotten its own Kysely instance
+    expect(instances[0]).not.toBe(outerKysely);
+    expect(instances[1]).not.toBe(outerKysely);
+    expect(instances[0]).not.toBe(instances[1]);
+    // The outer instance must be unchanged after both transactions complete
+    expect(xprisma.$kysely).toBe(outerKysely);
+  });
+
   it("should forbid the use of kysely's built-in transactions", async () => {
     await expect(
       xprisma.$kysely.transaction().execute(async () => {}),
