@@ -19,6 +19,13 @@ export class PrismaConnection implements DatabaseConnection {
   ): Promise<QueryResult<R>> {
     const { sql, parameters, query } = compiledQuery;
 
+    // Capture the caller stack trace to provide better error messages when a query fails
+    const callerStack: { stack?: string } = {};
+    Error.captureStackTrace(
+      callerStack,
+      PrismaConnection.prototype.executeQuery,
+    );
+
     // Delete, update and insert queries return the number of affected rows if no returning clause is specified
     const supportsReturning =
       DeleteQueryNode.is(query) ||
@@ -26,20 +33,30 @@ export class PrismaConnection implements DatabaseConnection {
       InsertQueryNode.is(query);
     const shouldReturnAffectedRows = supportsReturning && !query.returning;
 
-    // Execute the query with $executeRawUnsafe to get the number of affected rows
-    if (shouldReturnAffectedRows) {
-      const numAffectedRows = BigInt(
-        await this.prisma.$executeRawUnsafe(sql, ...parameters),
-      );
-      return {
-        rows: [],
-        numAffectedRows: numAffectedRows,
-      };
-    }
+    try {
+      // Execute the query with $executeRawUnsafe to get the number of affected rows
+      if (shouldReturnAffectedRows) {
+        const numAffectedRows = BigInt(
+          await this.prisma.$executeRawUnsafe(sql, ...parameters),
+        );
+        return {
+          rows: [],
+          numAffectedRows: numAffectedRows,
+        };
+      }
 
-    // Otherwise, execute it with $queryRawUnsafe to get the query results
-    const rows = await this.prisma.$queryRawUnsafe(sql, ...parameters);
-    return { rows };
+      // Otherwise, execute it with $queryRawUnsafe to get the query results
+      const rows = await this.prisma.$queryRawUnsafe(sql, ...parameters);
+      return { rows };
+    } catch (err) {
+      if (err instanceof Error && callerStack.stack) {
+        err.stack =
+          (err.stack ?? "") +
+          "\nFrom prisma-extension-kysely:\n" +
+          callerStack.stack;
+      }
+      throw err;
+    }
   }
 
   streamQuery<R>(
