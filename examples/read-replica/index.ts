@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { readReplicas } from "@prisma/extension-read-replicas";
 import {
   Kysely,
   SqliteAdapter,
@@ -6,10 +7,9 @@ import {
   SqliteQueryCompiler,
 } from "kysely";
 import kyselyExtension, {
-  PrismaKyselyExtensionArgs,
+  type PrismaKyselyExtensionArgs,
 } from "prisma-extension-kysely";
 import type { DB } from "./prisma/generated/types.js";
-import { readReplicas } from "@prisma/extension-read-replicas";
 
 // Use a common config for primary and replica clients
 const kyselyExtensionArgs: PrismaKyselyExtensionArgs<DB> = {

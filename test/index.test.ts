@@ -1,17 +1,17 @@
 import { PrismaClient } from "@prisma/client";
+import { readReplicas } from "@prisma/extension-read-replicas";
 import {
-  Compilable,
+  type Compilable,
   DeleteResult,
   InsertResult,
   Kysely,
-  KyselyPlugin,
+  type KyselyPlugin,
   SqliteAdapter,
   SqliteIntrospector,
   SqliteQueryCompiler,
   UpdateResult,
 } from "kysely";
-import { readReplicas } from "@prisma/extension-read-replicas";
-import { DB } from "../prisma/generated/types.js";
+import type { DB } from "../prisma/generated/types.js";
 import kyselyExtension from "../src/index.js";
 
 function withKysely(client: PrismaClient) {

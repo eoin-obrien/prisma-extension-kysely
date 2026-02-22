@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client/extension";
-import { DatabaseConnection, Driver, TransactionSettings } from "kysely";
+import type { DatabaseConnection, Driver, TransactionSettings } from "kysely";
 import { PrismaConnection } from "./connection.js";
 
 export class PrismaDriver<T extends PrismaClient> implements Driver {

@@ -30,9 +30,9 @@ const basePrisma = new PrismaClient({
 });
 
 basePrisma.$on("query", (e) => {
-  console.log("Query: " + e.query);
-  console.log("Params: " + e.params);
-  console.log("Duration: " + e.duration + "ms");
+  console.log(`Query: ${e.query}`);
+  console.log(`Params: ${e.params}`);
+  console.log(`Duration: ${e.duration}ms`);
 });
 
 const prisma = basePrisma.$extends(

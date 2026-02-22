@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { TransactionSettings } from "kysely";
+import type { TransactionSettings } from "kysely";
 import { PrismaConnection } from "../src/connection.js";
 import { PrismaDriver } from "../src/driver.js";
 
