@@ -64,23 +64,25 @@ jobs:
       - uses: wagoid/commitlint-github-action@v6
 
   examples:
-    name: Examples
+    name: Example (${{ matrix.example }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example: [basic, camel-case, esm, logging, read-replica]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_LTS }}
           cache: "npm"
+          cache-dependency-path: |
+            package-lock.json
+            examples/${{ matrix.example }}/package-lock.json
       - run: npm ci
       - run: npm run build
-      - name: Run examples
+      - name: Run example
+        working-directory: examples/${{ matrix.example }}
         run: |
-          for dir in examples/*/; do
-            echo "Running example in $dir..."
-            cd "$dir"
-            npm install
-            npx prisma db push
-            npm run dev
-            cd -
-          done
+          npm install
+          npx prisma db push
+          npm run dev
