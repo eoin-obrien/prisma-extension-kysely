@@ -85,7 +85,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_LTS }}
           cache: "npm"
-          cache-dependency-path: examples/${{ matrix.example }}/package-lock.json
+      - run: npm ci
       - name: Run example
         working-directory: examples/${{ matrix.example }}
         run: |
