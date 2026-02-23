@@ -2,10 +2,11 @@
 
 [![npm version](https://badge.fury.io/js/prisma-extension-kysely.svg)](https://badge.fury.io/js/prisma-extension-kysely)
 [![npm downloads](https://img.shields.io/npm/dm/prisma-extension-kysely.svg)](https://www.npmjs.com/package/prisma-extension-kysely)
+[![npm type definitions](https://img.shields.io/npm/types/prisma-extension-kysely)](https://www.npmjs.com/package/prisma-extension-kysely)
+[![Bundle size](https://img.shields.io/bundlephobia/minzip/prisma-extension-kysely)](https://bundlephobia.com/package/prisma-extension-kysely)
 [![Node.js CI](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/ci.yml/badge.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/ci.yml)
-[![GitHub release](https://img.shields.io/github/v/release/eoin-obrien/prisma-extension-kysely)](https://github.com/eoin-obrien/prisma-extension-kysely/releases)
 [![codecov](https://codecov.io/gh/eoin-obrien/prisma-extension-kysely/graph/badge.svg?token=C18C7BGISJ)](https://codecov.io/gh/eoin-obrien/prisma-extension-kysely)
-[![Maintainability](https://api.codeclimate.com/v1/badges/241b8b2b35abafc8af6e/maintainability)](https://codeclimate.com/github/eoin-obrien/prisma-extension-kysely/maintainability)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 [![GitHub license](https://img.shields.io/github/license/eoin-obrien/prisma-extension-kysely.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/blob/main/LICENSE)
 
 Writing and maintaining raw SQL queries for Prisma can be a tedious and error-prone task. The moment you need to write a query that is not supported out-of-the-box by Prisma, you lose all of that type-safety and autocompletion. This is where `prisma-extension-kysely` comes in! It allows you to easily write raw SQL queries in a type-safe manner with [`kysely`](https://kysely.dev/) and integrate them seamlessly with Prisma.

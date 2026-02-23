@@ -20,10 +20,11 @@ npx jest path/to/test.spec.ts
 # Watch mode
 npm run test:watch
 
-# Lint and format
-npm run lint
-npm run format:check
-npm run format   # auto-fix
+# Lint and format check (Biome)
+npm run check
+
+# Lint and format auto-fix
+npm run check:write
 ```
 
 Commits must follow [Conventional Commits](https://www.conventionalcommits.org/) — enforced by commitlint. Use `npm run commit` for an interactive prompt.
@@ -54,24 +55,21 @@ Runnable examples live in [examples/](examples/) (basic, camel-case, esm, loggin
 
 ## Go-Forward Plan (as of Feb 2026)
 
-The project has been unmaintained for ~12 months. Here is the prioritized work based on open issues and PRs:
-
-### High Priority
+### Active
 
 1. **Prisma 7 support (PR #336, Issue #292)** — Prisma 7 introduces a driver adapter architecture that is a breaking change. PR #336 (community-contributed) bumps to v4.0.0 and updates the extension to use driver adapters. This is the most impactful pending change and requires a major version release. Review and merge or rebase this PR.
 
-2. **Fix Prisma client import path (PR #208, current branch `patch-1`)** — The extension imports from `@prisma/client/extension` directly, which breaks when users configure a custom Prisma output path in `schema.prisma`. The staged change on the current branch addresses this (related to Issue #245).
+2. **Transaction reliability (Issue #71)** — Reports that `tx.$kysely` inside `prisma.$transaction` doesn't always use the transaction client. The current Proxy-based implementation is covered by 30 integration tests (all passing). Monitor for new reproduction cases; likely a v4 concern.
 
-3. **Pin peer dependency version (Issue #289)** — `@prisma/client: "latest"` in `peerDependencies` is fragile. Should be pinned to a specific major version range (e.g., `"^5.0.0 || ^6.0.0"` for the current v3.x, and `"^7.0.0"` for v4.x).
+### Completed (v3.x)
 
-### Medium Priority
+- ✅ **Fix Prisma client import path (Issue #245)** — `src/index.ts` now imports `Prisma` from `@prisma/client/extension`, consistent with `driver.ts` and `connection.ts`. Fixes failures when a custom Prisma output path is configured.
+- ✅ **Pin peer dependency version (Issue #289)** — `peerDependencies` now specifies `"@prisma/client": "^5.0.0 || ^6.0.0"`.
+- ✅ **Kysely ^0.27 + ^0.28 both supported** — `peerDependencies` and `devDependencies` updated.
+- ✅ **Publishing overhauled** — Replaced release-please + npm token with semantic-release + npm OIDC trusted publishing (`workflow_dispatch` trigger, no long-lived secrets). See `.github/workflows/release.yml` and `.releaserc.json`.
+- ✅ **Renovate replaced with Dependabot** — Weekly grouped updates via `.github/dependabot.yml`.
+- ✅ **Dependency hygiene** — commitlint v20, ts-jest v30, Biome v2.
 
-4. **Transaction reliability (Issue #71)** — Ongoing reports that `tx.$kysely` inside `prisma.$transaction` doesn't always use the transaction client. The current implementation uses a Proxy to wrap `$transaction` — verify this works correctly across Prisma versions and consider adding integration tests.
+### Intentionally Deferred to v4
 
-5. **Update Kysely to ^0.28.0 (PR #227)** — Kysely has had breaking changes since the currently pinned ^0.27.0.
-
-6. **Update `@prisma/extension-read-replicas` to ^0.5.0 (PR #323)**.
-
-### Dependency Hygiene (Renovate PRs)
-
-Renovate has many open PRs for major bumps (ESLint v10, commitlint v20, etc.). These can be merged once the main feature work is settled.
+- `@prisma/extension-read-replicas@^0.5.0` requires Prisma 7 — will be picked up as part of the v4 work.

@@ -57,7 +57,7 @@
     "build:compile": "tsc -b tsconfig.json tsconfig.cjs.json && tsconfig-to-dual-package",
     "build": "npm run build:clean && npm run build:compile",
     "prepack": "npm run build",
-    "prepare": "husky install || true",
+    "prepare": "husky || true",
     "commit": "git-cz",
     "check": "biome check .",
     "check:write": "biome check --write ."
