@@ -79,7 +79,7 @@ async function main() {
     console.log("Updated users:", Number(affectedRows.numUpdatedRows));
 
     return insertedUser;
-  });
+  }, { timeout: 30000 });
 
   // Create a post
   await prisma
