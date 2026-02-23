@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write # create tags, GitHub releases, commit CHANGELOG back to main
+  issues: write # close issues referenced in commits
+  pull-requests: write # comment on merged PRs
+  id-token: write # npm OIDC trusted publishing
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    environment: npm-publish # scope OIDC token to this environment
+    env:
+      NODE_LTS: "22"
+      HUSKY: "0"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # semantic-release needs full git history
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_LTS }}
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true" # attach provenance to every publish
