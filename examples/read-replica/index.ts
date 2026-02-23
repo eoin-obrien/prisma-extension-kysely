@@ -41,6 +41,10 @@ const prisma = new PrismaClient()
   );
 
 async function main() {
+  // Enable WAL mode so that the replica's open connection doesn't block
+  // the primary's write transactions (both clients share the same SQLite file).
+  await prisma.$executeRawUnsafe("PRAGMA journal_mode=WAL");
+
   console.log(
     "Is prisma.$kysely the same as prisma.$primary().$kysely?",
     prisma.$kysely === prisma.$primary().$kysely,
