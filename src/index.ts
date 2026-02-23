@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client/extension";
 import type { Kysely } from "kysely";
 import { PrismaDriver } from "./driver.js";
 
@@ -9,7 +9,6 @@ export type PrismaKyselyExtensionArgs<Database> = {
   /**
    * The Kysely instance to provide to the Prisma client
    */
-  // kysely: Kysely<Database>;
   kysely: (driver: PrismaDriver<unknown>) => Kysely<Database>;
 };
 
@@ -52,12 +51,16 @@ export default <Database>(extensionArgs: PrismaKyselyExtensionArgs<Database>) =>
       (...args: Parameters<typeof target.$transaction>) => {
         if (typeof args[0] === "function") {
           // If the first argument is a function, add a fresh Kysely instance to the transaction client
-          const [fn, options] = args;
+          // biome-ignore lint/suspicious/noExplicitAny: @prisma/client/extension types $transaction overloads differently
+          type ExtensionTransactionArgs = [(tx: any) => Promise<unknown>, any?];
+          const [fn, options] = args as unknown as ExtensionTransactionArgs;
           return target.$transaction(async (tx) => {
             // The Kysely instance should call the transaction client, not the original client
             const driver = new PrismaDriver(tx);
             const kysely = extensionArgs.kysely(driver);
-            tx.$kysely = kysely;
+            // Attach the Kysely instance to the transaction client so that it can be accessed in the transaction function
+            // biome-ignore lint/suspicious/noExplicitAny: @prisma/client/extension types $transaction overloads differently
+            (tx as any).$kysely = kysely;
             return fn(tx);
           }, options);
         } else {
