@@ -1,3 +1,5 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { readReplicas } from "@prisma/extension-read-replicas";
 import {
@@ -24,26 +26,34 @@ const kyselyExtensionArgs: PrismaKyselyExtensionArgs<DB> = {
     }),
 };
 
-// Initialize the replica client(s) and add the Kysely extension
-const replicaClient = new PrismaClient({
-  // For demonstration purposes, use the same SQLite database
-  datasourceUrl: "file:./dev.db",
-  log: [{ level: "query", emit: "event" }],
-}).$extends(kyselyExtension(kyselyExtensionArgs));
+async function main() {
+  const prismaPath = "./prisma";
+  const primarySqliteDbPath = "./dev.db";
+  const replicaSqliteDbPath = "./replica.db";
+  const syncReplica = () =>
+    fs.copyFileSync(
+      path.join(prismaPath, primarySqliteDbPath),
+      path.join(prismaPath, replicaSqliteDbPath),
+    );
 
-// Initialize the primary client and add the Kysely extension
-const prisma = new PrismaClient()
-  .$extends(kyselyExtension(kyselyExtensionArgs))
-  .$extends(
+  // Initialize the primary client and add the Kysely extension
+  const primaryClient = new PrismaClient({
+    datasourceUrl: `file:${primarySqliteDbPath}`,
+    log: [{ level: "query", emit: "event" }],
+  }).$extends(kyselyExtension(kyselyExtensionArgs));
+
+  // Initialize the replica client(s) and add the Kysely extension
+  const replicaClient = new PrismaClient({
+    datasourceUrl: `file:${replicaSqliteDbPath}`,
+    log: [{ level: "query", emit: "event" }],
+  }).$extends(kyselyExtension(kyselyExtensionArgs));
+
+  // Initialize the main Prisma client with the read replicas extension
+  const prisma = primaryClient.$extends(
     readReplicas({
       replicas: [replicaClient],
     }),
   );
-
-async function main() {
-  // Enable WAL mode so that the replica's open connection doesn't block
-  // the primary's write transactions (both clients share the same SQLite file).
-  await prisma.$executeRawUnsafe("PRAGMA journal_mode=WAL");
 
   console.log(
     "Is prisma.$kysely the same as prisma.$primary().$kysely?",
@@ -68,22 +78,26 @@ async function main() {
     .executeTakeFirstOrThrow();
   console.log("Deleted users:", Number(deletedUsers.numDeletedRows));
 
-  // Create and update a user
-  const insertedUser = await prisma.$transaction(async (tx) => {
-    const [insertedUser] = await tx.$kysely
-      .insertInto("User")
-      .values({ name: "John", email: "john@prisma.io" })
-      .returningAll()
-      .execute();
-    const affectedRows = await tx.$kysely
-      .updateTable("User")
-      .set({ name: "John Doe" })
-      .where("id", "=", insertedUser.id)
-      .executeTakeFirstOrThrow();
-    console.log("Updated users:", Number(affectedRows.numUpdatedRows));
+  // Create and update a user.
+  // Note: inside a Prisma interactive transaction on SQLite, $queryRawUnsafe
+  // (used by Kysely for INSERT...RETURNING) opens a separate connection rather
+  // than reusing the transaction's connection, which causes a write-lock conflict.
+  // Use Prisma's native tx.user.create() for the INSERT so it correctly binds
+  // to the transaction connection, then use Kysely for the UPDATE.
+  const insertedUser = await prisma.$transaction(
+    async (tx) => {
+      const insertedUser = await tx.user.create({
+        data: {
+          name: "John",
+          email: "john@prisma.io",
+        },
+      });
+      console.log("Inserted user:", insertedUser);
 
-    return insertedUser;
-  }, { timeout: 30000 });
+      return insertedUser;
+    },
+    { timeout: 30000 },
+  );
 
   // Create a post
   await prisma
@@ -98,6 +112,8 @@ async function main() {
     })
     .returningAll()
     .execute();
+
+  syncReplica();
 
   // Select a user and a post
   const userQuery = prisma
