@@ -2,11 +2,11 @@
 
 [![npm version](https://badge.fury.io/js/prisma-extension-kysely.svg)](https://badge.fury.io/js/prisma-extension-kysely)
 [![npm downloads](https://img.shields.io/npm/dm/prisma-extension-kysely.svg)](https://www.npmjs.com/package/prisma-extension-kysely)
-[![GitHub license](https://img.shields.io/github/license/eoin-obrien/prisma-extension-kysely.svg)](https://www.npmjs.com/package/prisma-extension-kysely)
 [![Node.js CI](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/ci.yml/badge.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/ci.yml)
-[![Node.js Package](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/actions/workflows/npm-publish.yml)
+[![GitHub release](https://img.shields.io/github/v/release/eoin-obrien/prisma-extension-kysely)](https://github.com/eoin-obrien/prisma-extension-kysely/releases)
 [![codecov](https://codecov.io/gh/eoin-obrien/prisma-extension-kysely/graph/badge.svg?token=C18C7BGISJ)](https://codecov.io/gh/eoin-obrien/prisma-extension-kysely)
 [![Maintainability](https://api.codeclimate.com/v1/badges/241b8b2b35abafc8af6e/maintainability)](https://codeclimate.com/github/eoin-obrien/prisma-extension-kysely/maintainability)
+[![GitHub license](https://img.shields.io/github/license/eoin-obrien/prisma-extension-kysely.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/blob/main/LICENSE)
 
 Writing and maintaining raw SQL queries for Prisma can be a tedious and error-prone task. The moment you need to write a query that is not supported out-of-the-box by Prisma, you lose all of that type-safety and autocompletion. This is where `prisma-extension-kysely` comes in! It allows you to easily write raw SQL queries in a type-safe manner with [`kysely`](https://kysely.dev/) and integrate them seamlessly with Prisma.
 
@@ -27,9 +27,14 @@ You don't have to take our word for it, though:
 - **Autocompletion** — Get autocompletion for your queries in your IDE
 - **Type inference** — Get type inference for your queries in your IDE
 
-## Get started
+## Compatibility
 
-Click the **Use this template** button and provide details for your Client extension
+| prisma-extension-kysely | Prisma         | Kysely          |
+|-------------------------|----------------|-----------------|
+| v3.x                    | ^5.0 \| ^6.0  | ^0.27 \| ^0.28  |
+| v4.x *(coming soon)*   | ^7.0           | ^0.28           |
+
+## Get started
 
 Install the dependencies:
 
@@ -104,7 +109,7 @@ await prisma.$kysely.deleteFrom("User").where("id", "=", id).execute();
 
 ## Transactions
 
-Prisma's interactive transactions are fully supported by `prisma-extension-kysely`! Just remeber to use `tx.$kysely` instead of `prisma.$kysely`, and you're good to go:
+Prisma's interactive transactions are fully supported by `prisma-extension-kysely`! Just remember to use `tx.$kysely` instead of `prisma.$kysely`, and you're good to go:
 
 ```typescript
 await prisma.$transaction(async (tx) => {
