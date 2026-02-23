@@ -5,12 +5,12 @@
     "dev": "node --loader ts-node/esm index.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.0.0",
+    "@prisma/client": "^6.0.0",
     "kysely": "^0.27.0 || ^0.28.0",
     "prisma-extension-kysely": "file:../.."
   },
   "devDependencies": {
-    "prisma": "^5.0.0",
+    "prisma": "^6.0.0",
     "prisma-kysely": "^1.7.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.0"
