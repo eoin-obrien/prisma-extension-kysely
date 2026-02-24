@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
           cache: npm
       - name: Install dependencies
         run: npm clean-install
@@ -34,6 +34,8 @@ jobs:
         run: npm audit signatures
       - name: Build
         run: npm run build
+      - name: Remove npmrc to enable OIDC
+        run: rm -f ~/.npmrc
       - name: Release
         run: npx semantic-release
         env:
