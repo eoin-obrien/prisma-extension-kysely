@@ -2,16 +2,19 @@
   "name": "example",
   "type": "module",
   "scripts": {
-    "dev": "node --loader ts-node/esm index.ts"
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "dev": "node --loader ts-node/esm index.ts",
+    "start": "npm run db:push && npm run db:generate && npm run dev"
   },
   "dependencies": {
-    "@prisma/client": "^6.0.0",
+    "@prisma/client": "^7.0.0",
     "kysely": "^0.27.0 || ^0.28.0",
     "prisma-extension-kysely": "file:../.."
   },
   "devDependencies": {
-    "prisma": "^6.0.0",
-    "prisma-kysely": "^1.7.1",
+    "prisma": "^7.0.0",
+    "prisma-kysely": "^3.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.0"
   }

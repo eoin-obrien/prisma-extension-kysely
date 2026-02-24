@@ -1,3 +1,4 @@
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@prisma/client";
 import {
   Kysely,
@@ -8,7 +9,12 @@ import {
 import kyselyExtension from "prisma-extension-kysely";
 import type { DB } from "./prisma/generated/types.js";
 
+const adapter = new PrismaBetterSqlite3({
+  url: "file:./dev.db",
+});
+
 const basePrisma = new PrismaClient({
+  adapter,
   log: [
     {
       emit: "event",
