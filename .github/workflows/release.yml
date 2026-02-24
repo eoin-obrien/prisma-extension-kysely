@@ -21,10 +21,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: "22"
           cache: npm
       - name: Install dependencies
         run: npm clean-install
@@ -40,5 +41,4 @@ jobs:
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_CONFIG_REGISTRY: "https://registry.npmjs.org/"
           NPM_CONFIG_PROVENANCE: "true" # attach provenance to every publish
