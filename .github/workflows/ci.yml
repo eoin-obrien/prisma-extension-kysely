@@ -90,5 +90,4 @@ jobs:
         working-directory: examples/${{ matrix.example }}
         run: |
           npm install
-          npx prisma db push
-          npm run dev
+          npm start
