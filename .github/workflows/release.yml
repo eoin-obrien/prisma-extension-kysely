@@ -4,32 +4,36 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # create tags, GitHub releases, commit CHANGELOG back to main
-  issues: write # close issues referenced in commits
-  pull-requests: write # comment on merged PRs
-  id-token: write # npm OIDC trusted publishing
+  contents: read # for checkout
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    environment: npm-publish # scope OIDC token to this environment
-    env:
-      NODE_LTS: "22"
-      HUSKY: "0"
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for trusted publishing and npm provenance
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # semantic-release needs full git history
+          fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_LTS }}
-          registry-url: https://registry.npmjs.org
+          node-version: "lts/*"
           cache: npm
-      - run: npm ci
-      - run: npm run build
-      - run: npx semantic-release
+      - name: Install dependencies
+        run: npm clean-install
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+      - name: Build
+        run: npm run build
+      - name: Release
+        run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true" # attach provenance to every publish
