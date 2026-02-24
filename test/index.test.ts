@@ -1,3 +1,4 @@
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@prisma/client";
 import { readReplicas } from "@prisma/extension-read-replicas";
 import {
@@ -36,7 +37,10 @@ async function expectModelCount(client: PrismaClient, count: number) {
 }
 
 describe("prisma-extension-kysely", () => {
-  const prisma = new PrismaClient();
+  const adapter = new PrismaBetterSqlite3({
+    url: process.env.DATABASE_URL || "file:./dev.db",
+  });
+  const prisma = new PrismaClient({ adapter });
   const xprisma = withKysely(prisma);
 
   const $queryRawUnsafeSpy = jest.spyOn(prisma, "$queryRawUnsafe");
@@ -297,7 +301,7 @@ describe("prisma-extension-kysely", () => {
   });
 
   describe("@prisma/extension-read-replicas", () => {
-    const replica = withKysely(new PrismaClient());
+    const replica = withKysely(new PrismaClient({ adapter }));
 
     const prismaWithReplica = xprisma.$extends(
       readReplicas({
