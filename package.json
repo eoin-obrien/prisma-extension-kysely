@@ -47,9 +47,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "pretest": "prisma db push",
     "test": "jest",
@@ -70,7 +68,7 @@
     }
   },
   "peerDependencies": {
-    "@prisma/client": "^5.0.0 || ^6.0.0",
+    "@prisma/client": "^7.0.0",
     "kysely": "^0.27.0 || ^0.28.0"
   },
   "devDependencies": {
@@ -78,19 +76,21 @@
     "@commitlint/cli": "^20.0.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@commitlint/cz-commitlint": "^20.0.0",
-    "@prisma/client": "^6.0.0",
-    "@prisma/extension-read-replicas": "^0.4.0",
+    "@prisma/adapter-better-sqlite3": "^7.4.1",
+    "@prisma/client": "^7.0.0",
+    "@prisma/extension-read-replicas": "^0.5.0",
     "@semantic-release/changelog": "^6.0.0",
     "@semantic-release/git": "^10.0.0",
     "@types/jest": "^30.0.0",
     "commitizen": "^4.3.0",
+    "dotenv": "^17.3.1",
     "husky": "^9.0.0",
     "inquirer": "^9.0.0",
     "jest": "^30.0.0",
     "jest-mock-extended": "^4.0.0",
     "kysely": "^0.28.0",
-    "prisma": "^6.0.0",
-    "prisma-kysely": "^2.0.0",
+    "prisma": "^7.0.0",
+    "prisma-kysely": "^3.0.0",
     "semantic-release": "^25.0.3",
     "ts-jest": "^29.4.0",
     "tsconfig-to-dual-package": "^1.2.0",
