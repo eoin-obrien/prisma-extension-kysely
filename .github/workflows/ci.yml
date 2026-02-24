@@ -9,7 +9,7 @@ on:
     branches: ["main"]
 
 env:
-  NODE_LTS: "20"
+  NODE_LTS: "22"
   HUSKY: "0"
 
 jobs:
