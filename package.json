@@ -89,7 +89,7 @@
     "jest": "^30.0.0",
     "jest-mock-extended": "^4.0.0",
     "kysely": "^0.28.0",
-    "prisma": "^6.0.0",
+    "prisma": "^7.4.1",
     "prisma-kysely": "^2.0.0",
     "semantic-release": "^25.0.3",
     "ts-jest": "^29.4.0",
