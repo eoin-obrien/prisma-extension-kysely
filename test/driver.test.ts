@@ -1,6 +1,6 @@
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaClient } from "@prisma/client";
 import type { TransactionSettings } from "kysely";
+import { PrismaClient } from "../prisma/generated/prisma/client.js";
 import { PrismaConnection } from "../src/connection.js";
 import { PrismaDriver } from "../src/driver.js";
 

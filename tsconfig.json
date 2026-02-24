@@ -14,7 +14,13 @@
     "skipLibCheck": true,
     "strict": true,
     "allowJs": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": ["vitest/globals"]
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "prisma/**/*.ts",
+    "generated/**/*.ts",
+    "test/**/*.ts"
+  ]
 }
