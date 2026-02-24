@@ -11,6 +11,7 @@ import {
   SqliteQueryCompiler,
   UpdateResult,
 } from "kysely";
+import type { MockInstance } from "vitest";
 import type { DB } from "../generated/kysely/types.js";
 import { PrismaClient } from "../generated/prisma/client.js";
 import kyselyExtension from "../src/index.js";
