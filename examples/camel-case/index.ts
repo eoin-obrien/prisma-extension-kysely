@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import {
   CamelCasePlugin,
   Kysely,
@@ -7,9 +7,14 @@ import {
   SqliteQueryCompiler,
 } from "kysely";
 import kyselyExtension from "prisma-extension-kysely";
-import type { DB } from "./prisma/generated/types.js";
+import type { DB } from "./generated/kysely/types.js";
+import { PrismaClient } from "./generated/prisma/client";
 
-const prismaClient = new PrismaClient();
+const adapter = new PrismaBetterSqlite3({
+  url: "file:./dev.db",
+});
+
+const prismaClient = new PrismaClient({ adapter });
 const prisma = prismaClient.$extends(
   kyselyExtension({
     kysely: (driver) =>

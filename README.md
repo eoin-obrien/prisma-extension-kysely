@@ -9,6 +9,9 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 [![GitHub license](https://img.shields.io/github/license/eoin-obrien/prisma-extension-kysely.svg)](https://github.com/eoin-obrien/prisma-extension-kysely/blob/main/LICENSE)
 
+> [!IMPORTANT]
+> **v4.0 now requires Prisma 7.** Prisma 7 makes driver adapters a required part of `PrismaClient` — see the [Prisma 7 upgrade guide](https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7) to migrate your project. If you are on Prisma 5 or 6, continue using `prisma-extension-kysely` v3.
+
 Writing and maintaining raw SQL queries for Prisma can be a tedious and error-prone task. The moment you need to write a query that is not supported out-of-the-box by Prisma, you lose all of that type-safety and autocompletion. This is where `prisma-extension-kysely` comes in! It allows you to easily write raw SQL queries in a type-safe manner with [`kysely`](https://kysely.dev/) and integrate them seamlessly with Prisma.
 
 And the best part? You can use all of your favorite [`kysely`](https://kysely.dev/) plugins with `prisma-extension-kysely` too!
@@ -30,10 +33,10 @@ You don't have to take our word for it, though:
 
 ## Compatibility
 
-| prisma-extension-kysely | Prisma         | Kysely          |
-|-------------------------|----------------|-----------------|
-| v3.x                    | ^5.0 \| ^6.0  | ^0.27 \| ^0.28  |
-| v4.x *(coming soon)*   | ^7.0           | ^0.28           |
+| prisma-extension-kysely | Prisma       | Kysely         |
+| ----------------------- | ------------ | -------------- |
+| v3.x                    | ^5.0 \| ^6.0 | ^0.27 \| ^0.28 |
+| v4.x                    | ^7.0         | ^0.27 \| ^0.28 |
 
 ## Get started
 
@@ -41,6 +44,12 @@ Install the dependencies:
 
 ```shell
 npm install prisma-extension-kysely kysely
+```
+
+Install the driver adapter for your database. For example, for PostgreSQL:
+
+```shell
+npm install @prisma/adapter-pg pg
 ```
 
 Set up the excellent [`prisma-kysely`](https://www.npmjs.com/package/prisma-kysely) library to automatically generate types for your database:
@@ -66,10 +75,21 @@ npx prisma generate
 Extend your Prisma Client:
 
 ```typescript
+import { PrismaPg } from "@prisma/adapter-pg";
+import {
+  Kysely,
+  PostgresAdapter,
+  PostgresIntrospector,
+  PostgresQueryCompiler,
+} from "kysely";
 import kyselyExtension from "prisma-extension-kysely";
-import type { DB } from "./prisma/generated/types";
+import type { DB } from "./generated/kysely/types"; // Your path may vary depending on your setup in schema.prisma
 
-const prisma = new PrismaClient().$extends(
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const prisma = new PrismaClient({ adapter }).$extends(
   kyselyExtension({
     kysely: (driver) =>
       new Kysely<DB>({
@@ -138,7 +158,11 @@ await prisma.$kysely.transaction().execute(async (trx) => {});
 Do you love Kysely's plugins? So do we! You can use them with `prisma-extension-kysely` as well:
 
 ```typescript
-const prisma = new PrismaClient().$extends(
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const prisma = new PrismaClient({ adapter }).$extends(
   kyselyExtension({
     kysely: (driver) =>
       new Kysely<DB>({
@@ -178,22 +202,28 @@ const kyselyExtensionArgs: PrismaKyselyExtensionArgs<DB> = {
   kysely: (driver) =>
     new Kysely<DB>({
       dialect: {
-        createAdapter: () => new SqliteAdapter(),
+        createAdapter: () => new PostgresAdapter(),
         createDriver: () => driver,
-        createIntrospector: (db) => new SqliteIntrospector(db),
-        createQueryCompiler: () => new SqliteQueryCompiler(),
+        createIntrospector: (db) => new PostgresIntrospector(db),
+        createQueryCompiler: () => new PostgresQueryCompiler(),
       },
     }),
 };
 
-// Initialize the replica client(s) and add the Kysely extension
-const replicaClient = new PrismaClient({
-  datasourceUrl: "YOUR_REPLICA_URL", // Replace this with your replica's URL!
-  log: [{ level: "query", emit: "event" }],
-}).$extends(kyselyExtension(kyselyExtensionArgs));
+// Initialize the replica client(s) with its own adapter and add the Kysely extension
+const replicaAdapter = new PrismaPg({
+  connectionString: process.env.REPLICA_DATABASE_URL,
+});
+const replicaClient = new PrismaClient({ adapter: replicaAdapter }).$extends(
+  kyselyExtension(kyselyExtensionArgs),
+);
 
-// Initialize the primary client and add the Kysely extension and the read replicas extension
-const prisma = new PrismaClient()
+// Initialize the primary client with its own adapter, then add the Kysely
+// extension and the read replicas extension
+const primaryAdapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+const prisma = new PrismaClient({ adapter: primaryAdapter })
   .$extends(kyselyExtension(kyselyExtensionArgs)) // Apply the Kysely extension before the read replicas extension!
   .$extends(
     readReplicas({
@@ -203,19 +233,12 @@ const prisma = new PrismaClient()
 ```
 
 See how we're setting up the replica client as a fully-fledged Prisma client and extending it separately? That's the secret sauce!
-It make sure that the replica client has a separate Kysely instance. If you try to use bare URLs, you'll run into trouble;
+It makes sure that the replica client has a separate Kysely instance. If you try to use bare URLs, you'll run into trouble;
 it'll share the same Kysely instance as the primary client, and you'll get unpleasant surprises!
-
-```typescript
-// Don't do this! It won't work as expected.
-readReplicas({
-  url: "postgresql://user:password@localhost:5432/dbname",
-});
-```
 
 Also, note that we're applying the Kysely extension before the read replicas extension. This is important! If you apply the read replicas extension first, you won't get `.$kysely` on the primary client.
 
-Check out the [read replicas example](examples/read-replicas/) for a runnable example!
+Check out the [read replicas example](examples/read-replica/) for a runnable example!
 
 ## Examples
 
@@ -224,14 +247,14 @@ Check out the [examples](examples) directory for a sample project!
 ```shell
 cd examples/basic
 npm install
-npx prisma db push
-npm run dev
+npm start
 ```
 
 ## Learn more
 
 - [Kysely](https://kysely.dev/)
 - [`prisma-kysely`](https://www.npmjs.com/package/prisma-kysely)
+- [Prisma 7 upgrade guide](https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7)
 
 ## License
 

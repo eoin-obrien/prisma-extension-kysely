@@ -1,10 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import type { TransactionSettings } from "kysely";
+import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaConnection } from "../src/connection.js";
 import { PrismaDriver } from "../src/driver.js";
 
 describe("PrismaDriver", () => {
-  const prisma = new PrismaClient();
+  const adapter = new PrismaBetterSqlite3({
+    url: process.env.DATABASE_URL || "file:./dev.db",
+  });
+  const prisma = new PrismaClient({ adapter });
   let driver: PrismaDriver<typeof prisma>;
   let connection: PrismaConnection;
 

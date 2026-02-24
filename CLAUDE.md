@@ -15,7 +15,7 @@ npm run build
 npm test
 
 # Run a single test file
-npx jest path/to/test.spec.ts
+npx vitest run path/to/test.spec.ts
 
 # Watch mode
 npm run test:watch
@@ -47,7 +47,7 @@ The package is published as a dual ESM/CJS package:
 
 ### Tests
 
-Tests use Jest + ts-jest in ESM mode ([jest.config.mjs](jest.config.mjs)). The test database is SQLite at [prisma/dev.db](prisma/dev.db), set up via `prisma db push` (the `pretest` script). The Prisma schema at [prisma/schema.prisma](prisma/schema.prisma) also generates Kysely types via `prisma-kysely` to [prisma/generated/types.ts](prisma/generated/types.ts).
+Tests use Vitest ([vitest.config.ts](vitest.config.ts)). The test database is SQLite at [prisma/dev.db](prisma/dev.db), set up via `prisma db push` (the `pretest` script). The Prisma schema at [prisma/schema.prisma](prisma/schema.prisma) also generates Kysely types via `prisma-kysely` to [generated/kysely/types.ts](generated/kysely/types.ts).
 
 ### Examples
 
@@ -57,9 +57,12 @@ Runnable examples live in [examples/](examples/) (basic, camel-case, esm, loggin
 
 ### Active
 
-1. **Prisma 7 support (PR #336, Issue #292)** — Prisma 7 introduces a driver adapter architecture that is a breaking change. PR #336 (community-contributed) bumps to v4.0.0 and updates the extension to use driver adapters. This is the most impactful pending change and requires a major version release. Review and merge or rebase this PR.
+1. **Transaction reliability (Issue #71)** — Reports that `tx.$kysely` inside `prisma.$transaction` doesn't always use the transaction client. The current Proxy-based implementation is covered by 30 integration tests (all passing). Monitor for new reproduction cases.
 
-2. **Transaction reliability (Issue #71)** — Reports that `tx.$kysely` inside `prisma.$transaction` doesn't always use the transaction client. The current Proxy-based implementation is covered by 30 integration tests (all passing). Monitor for new reproduction cases; likely a v4 concern.
+### Completed (v4.0)
+
+- ✅ **Prisma 7 support (Issue #292)** — Prisma 7 introduces a driver adapter architecture as a breaking change. Updated the extension and all examples to use driver adapters. Bumped to v4.0.0. `@prisma/extension-read-replicas@^0.5.0` included.
+- ✅ **Migrate tests from Jest to Vitest** — Replaced jest + ts-jest with vitest for native ESM/TypeScript support.
 
 ### Completed (v3.x)
 
@@ -68,8 +71,4 @@ Runnable examples live in [examples/](examples/) (basic, camel-case, esm, loggin
 - ✅ **Kysely ^0.27 + ^0.28 both supported** — `peerDependencies` and `devDependencies` updated.
 - ✅ **Publishing overhauled** — Replaced release-please + npm token with semantic-release + npm OIDC trusted publishing (`workflow_dispatch` trigger, no long-lived secrets). See `.github/workflows/release.yml` and `.releaserc.json`.
 - ✅ **Renovate replaced with Dependabot** — Weekly grouped updates via `.github/dependabot.yml`.
-- ✅ **Dependency hygiene** — commitlint v20, ts-jest v30, Biome v2.
-
-### Intentionally Deferred to v4
-
-- `@prisma/extension-read-replicas@^0.5.0` requires Prisma 7 — will be picked up as part of the v4 work.
+- ✅ **Dependency hygiene** — commitlint v20, Biome v2.

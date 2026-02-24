@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { readReplicas } from "@prisma/extension-read-replicas";
 import {
   type Compilable,
@@ -11,7 +11,9 @@ import {
   SqliteQueryCompiler,
   UpdateResult,
 } from "kysely";
-import type { DB } from "../prisma/generated/types.js";
+import type { MockInstance } from "vitest";
+import type { DB } from "../generated/kysely/types.js";
+import { PrismaClient } from "../generated/prisma/client.js";
 import kyselyExtension from "../src/index.js";
 
 function withKysely(client: PrismaClient) {
@@ -36,14 +38,26 @@ async function expectModelCount(client: PrismaClient, count: number) {
 }
 
 describe("prisma-extension-kysely", () => {
-  const prisma = new PrismaClient();
+  const adapter = new PrismaBetterSqlite3({
+    url: process.env.DATABASE_URL || "file:./dev.db",
+  });
+  const prisma = new PrismaClient({ adapter });
   const xprisma = withKysely(prisma);
 
-  const $queryRawUnsafeSpy = jest.spyOn(prisma, "$queryRawUnsafe");
-  const $executeRawUnsafeSpy = jest.spyOn(prisma, "$executeRawUnsafe");
+  // Prisma 7's client is a Proxy; own property values are undefined but the Proxy get trap
+  // returns the actual function. Vitest's vi.spyOn reads from the descriptor (undefined),
+  // so we capture the originals first and pass them as the spy implementation.
+  const origQueryRawUnsafe = prisma.$queryRawUnsafe.bind(prisma);
+  const origExecuteRawUnsafe = prisma.$executeRawUnsafe.bind(prisma);
+  const $queryRawUnsafeSpy = vi
+    .spyOn(prisma, "$queryRawUnsafe")
+    .mockImplementation(origQueryRawUnsafe);
+  const $executeRawUnsafeSpy = vi
+    .spyOn(prisma, "$executeRawUnsafe")
+    .mockImplementation(origExecuteRawUnsafe);
 
   const checkSpyCalledWith = (
-    spy: jest.SpyInstance,
+    spy: MockInstance,
     query: Compilable<unknown>,
   ) => {
     const { sql, parameters } = query.compile();
@@ -258,8 +272,8 @@ describe("prisma-extension-kysely", () => {
 
   it("should support kysely plugins", async () => {
     const plugin: KyselyPlugin = {
-      transformQuery: jest.fn((args) => args.node),
-      transformResult: jest.fn(async (args) => args.result),
+      transformQuery: vi.fn((args) => args.node),
+      transformResult: vi.fn(async (args) => args.result),
     };
     const query = xprisma.$kysely
       .withPlugin(plugin)
@@ -297,7 +311,7 @@ describe("prisma-extension-kysely", () => {
   });
 
   describe("@prisma/extension-read-replicas", () => {
-    const replica = withKysely(new PrismaClient());
+    const replica = withKysely(new PrismaClient({ adapter }));
 
     const prismaWithReplica = xprisma.$extends(
       readReplicas({
