@@ -7,3 +7,4 @@ coverage:
 
 ignore:
   - "examples/**"
+  - "prisma.config.ts"
