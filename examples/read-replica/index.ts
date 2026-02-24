@@ -1,5 +1,4 @@
 import * as fs from "node:fs";
-import * as path from "node:path";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@prisma/client";
 import { readReplicas } from "@prisma/extension-read-replicas";
@@ -28,14 +27,12 @@ const kyselyExtensionArgs: PrismaKyselyExtensionArgs<DB> = {
 };
 
 async function main() {
-  const prismaPath = "./prisma";
   const primarySqliteDbPath = "./dev.db";
   const replicaSqliteDbPath = "./replica.db";
   const syncReplica = () =>
-    fs.copyFileSync(
-      path.join(prismaPath, primarySqliteDbPath),
-      path.join(prismaPath, replicaSqliteDbPath),
-    );
+    fs.copyFileSync(primarySqliteDbPath, replicaSqliteDbPath);
+
+  syncReplica();
 
   const primaryAdapter = new PrismaBetterSqlite3({
     url: `file:${primarySqliteDbPath}`,
@@ -47,14 +44,12 @@ async function main() {
   // Initialize the primary client and add the Kysely extension
   const primaryClient = new PrismaClient({
     adapter: primaryAdapter,
-    datasourceUrl: `file:${primarySqliteDbPath}`,
     log: [{ level: "query", emit: "event" }],
   }).$extends(kyselyExtension(kyselyExtensionArgs));
 
   // Initialize the replica client(s) and add the Kysely extension
   const replicaClient = new PrismaClient({
     adapter: replicaAdapter,
-    datasourceUrl: `file:${replicaSqliteDbPath}`,
     log: [{ level: "query", emit: "event" }],
   }).$extends(kyselyExtension(kyselyExtensionArgs));
 

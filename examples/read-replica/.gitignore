@@ -2,5 +2,5 @@
 prisma/generated
 
 # Prisma local database file
-prisma/dev.db
-prisma/replica.db
+dev.db
+replica.db
