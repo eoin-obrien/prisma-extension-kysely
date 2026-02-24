@@ -25,8 +25,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "lts/*"
           cache: npm
+          registry-url: "https://registry.npmjs.org/"
+      - name: Debug npm auth
+        run: |
+          npm config list
+          cat ~/.npmrc || echo "No ~/.npmrc found"
+          cat .npmrc || echo "No .npmrc found"
+          node -e "console.log('NODE_AUTH_TOKEN set:', !!process.env.NODE_AUTH_TOKEN)"
+          node -e "console.log('NPM_TOKEN set:', !!process.env.NPM_TOKEN)"
       - name: Install dependencies
         run: npm clean-install
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
