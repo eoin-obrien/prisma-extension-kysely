@@ -1,3 +1,12 @@
+## [3.0.1](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v3.0.0...v3.0.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* **deps:** pin peer deps and bump dev dependencies for pre-v4 release ([0ca8c56](https://github.com/eoin-obrien/prisma-extension-kysely/commit/0ca8c56347078154b5ce2d663e0fd18dcd47509e))
+* import Prisma from @prisma/client/extension for custom output path support ([f1be74c](https://github.com/eoin-obrien/prisma-extension-kysely/commit/f1be74cfd7c6f2fd535823e9c81aef4a30c5f783)), closes [#245](https://github.com/eoin-obrien/prisma-extension-kysely/issues/245)
+* preserve caller stack trace in query errors ([#344](https://github.com/eoin-obrien/prisma-extension-kysely/issues/344)) ([4dcc793](https://github.com/eoin-obrien/prisma-extension-kysely/commit/4dcc793bc922f78ed05cf8db2e03bddb30424bc9)), closes [#189](https://github.com/eoin-obrien/prisma-extension-kysely/issues/189)
+
 # Changelog
 
 ## [3.0.0](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v2.1.0...v3.0.0) (2024-10-24)
