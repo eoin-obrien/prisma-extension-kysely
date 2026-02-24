@@ -63,7 +63,6 @@ Add `prisma-kysely` as a generator to your `schema.prisma`:
 ```prisma
 generator kysely {
   provider = "prisma-kysely"
-  output   = "../generated/kysely"
 }
 ```
 
