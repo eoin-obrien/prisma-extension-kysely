@@ -69,7 +69,10 @@ Extend your Prisma Client:
 import kyselyExtension from "prisma-extension-kysely";
 import type { DB } from "./prisma/generated/types";
 
-const prisma = new PrismaClient().$extends(
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+const prisma = new PrismaClient({ adapter }).$extends(
   kyselyExtension({
     kysely: (driver) =>
       new Kysely<DB>({

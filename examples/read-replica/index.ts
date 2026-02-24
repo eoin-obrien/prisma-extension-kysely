@@ -1,6 +1,5 @@
 import * as fs from "node:fs";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaClient } from "@prisma/client";
 import { readReplicas } from "@prisma/extension-read-replicas";
 import {
   Kysely,
@@ -11,7 +10,8 @@ import {
 import kyselyExtension, {
   type PrismaKyselyExtensionArgs,
 } from "prisma-extension-kysely";
-import type { DB } from "./prisma/generated/types.js";
+import type { DB } from "./generated/kysely/types.js";
+import { PrismaClient } from "./generated/prisma/client";
 
 // Use a common config for primary and replica clients
 const kyselyExtensionArgs: PrismaKyselyExtensionArgs<DB> = {

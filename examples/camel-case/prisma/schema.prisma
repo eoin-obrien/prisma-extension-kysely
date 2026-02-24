@@ -2,11 +2,13 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 generator kysely {
-  provider = "prisma-kysely"
+  provider  = "prisma-kysely"
+  output    = "../generated/kysely"
   camelCase = true
 }
 
