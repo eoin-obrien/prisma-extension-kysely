@@ -17,10 +17,5 @@
     "allowSyntheticDefaultImports": true,
     "types": ["vitest/globals"]
   },
-  "include": [
-    "src/**/*.ts",
-    "prisma/**/*.ts",
-    "generated/**/*.ts",
-    "test/**/*.ts"
-  ]
+  "include": ["src/**/*.ts"]
 }
