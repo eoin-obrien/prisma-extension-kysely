@@ -7,6 +7,7 @@
     "start": "npm run db:push && npm run db:generate && npm run dev"
   },
   "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "@prisma/extension-read-replicas": "^0.5.0",
     "kysely": "^0.27.0 || ^0.28.0",
