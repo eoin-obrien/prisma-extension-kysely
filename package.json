@@ -52,6 +52,7 @@
     "pretest": "prisma db push && prisma generate",
     "test": "vitest run",
     "test:watch": "vitest",
+    "pretest:coverage": "prisma db push && prisma generate",
     "test:coverage": "vitest run --coverage",
     "build:clean": "rm -rf ./dist",
     "build:compile": "tsc -b tsconfig.json tsconfig.cjs.json && tsconfig-to-dual-package",
