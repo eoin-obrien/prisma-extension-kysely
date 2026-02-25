@@ -1,8 +1,26 @@
 {
   "branches": ["main"],
   "plugins": [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "angular",
+        "parserOpts": {
+          "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"],
+          "breakingHeaderPattern": "^(\\w*)(?:\\(([\\w$@.\\-*/ ]*)\\))?!: (.*)$"
+        }
+      }
+    ],
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "angular",
+        "parserOpts": {
+          "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"],
+          "breakingHeaderPattern": "^(\\w*)(?:\\(([\\w$@.\\-*/ ]*)\\))?!: (.*)$"
+        }
+      }
+    ],
     ["@semantic-release/changelog", { "changelogFile": "CHANGELOG.md" }],
     ["@semantic-release/npm", { "npmPublish": true }],
     [
