@@ -1,3 +1,20 @@
+# [4.0.0](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v3.0.1...v4.0.0) (2026-02-25)
+
+
+### Bug Fixes
+
+* **release:** add breakingHeaderPattern to recognize feat! commits ([#360](https://github.com/eoin-obrien/prisma-extension-kysely/issues/360)) ([c0e75db](https://github.com/eoin-obrien/prisma-extension-kysely/commit/c0e75dbae31f59ded3e59d0e21d06d8256754c23))
+
+
+### Features
+
+* add Prisma 7 support with driver adapters ([#359](https://github.com/eoin-obrien/prisma-extension-kysely/issues/359)) ([8417ed2](https://github.com/eoin-obrien/prisma-extension-kysely/commit/8417ed22520537660d42fd325191c1cbe6525d47))
+
+
+### BREAKING CHANGES
+
+* add Prisma 7 support with driver adapters (#359)
+
 ## [3.0.1](https://github.com/eoin-obrien/prisma-extension-kysely/compare/v3.0.0...v3.0.1) (2026-02-24)
 
 

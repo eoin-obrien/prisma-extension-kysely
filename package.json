@@ -1,6 +1,6 @@
 {
   "name": "prisma-extension-kysely",
-  "version": "3.0.1",
+  "version": "4.0.0",
   "author": {
     "name": "Eoin O'Brien",
     "url": "https://eoin.ai",
@@ -47,7 +47,10 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "!**/*.tsbuildinfo"],
+  "files": [
+    "dist",
+    "!**/*.tsbuildinfo"
+  ],
   "scripts": {
     "pretest": "prisma db push && prisma generate",
     "test": "vitest run",
