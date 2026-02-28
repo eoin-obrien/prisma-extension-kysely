@@ -47,10 +47,8 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "!**/*.tsbuildinfo"
-  ],
+  "sideEffects": false,
+  "files": ["dist", "!**/*.tsbuildinfo"],
   "scripts": {
     "pretest": "prisma db push && prisma generate",
     "test": "vitest run",
@@ -76,7 +74,7 @@
     "kysely": "^0.27.0 || ^0.28.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.4",
+    "@biomejs/biome": "2.4.4",
     "@commitlint/cli": "^20.0.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@commitlint/cz-commitlint": "^20.0.0",
