@@ -83,7 +83,7 @@
     "@prisma/extension-read-replicas": "^0.5.0",
     "@semantic-release/changelog": "^6.0.0",
     "@semantic-release/git": "^10.0.0",
-    "@vitest/coverage-v8": "^3.0.0",
+    "@vitest/coverage-v8": "^4.0.18",
     "commitizen": "^4.3.0",
     "dotenv": "^17.3.1",
     "husky": "^9.0.0",
