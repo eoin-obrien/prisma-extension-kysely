@@ -7,7 +7,7 @@ import {
 } from "kysely";
 import kyselyExtension from "prisma-extension-kysely";
 import type { DB } from "./generated/kysely/types.js";
-import { PrismaClient } from "./generated/prisma/client";
+import { PrismaClient } from "./generated/prisma/client.js";
 
 const adapter = new PrismaBetterSqlite3({
   url: "file:./dev.db",
