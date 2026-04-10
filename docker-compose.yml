@@ -1,0 +1,17 @@
+# Local Postgres for `npm run test:postgres`. CI provisions its own Postgres
+# via a service container — see .github/workflows/ci.yml.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: prisma-extension-kysely-postgres
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d test"]
+      interval: 1s
+      timeout: 3s
+      retries: 30

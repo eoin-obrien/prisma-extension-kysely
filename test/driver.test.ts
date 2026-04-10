@@ -1,13 +1,27 @@
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
+import type { SqlDriverAdapterFactory } from "@prisma/client/runtime/library";
 import type { TransactionSettings } from "kysely";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaConnection } from "../src/connection.js";
 import { PrismaDriver } from "../src/driver.js";
 
-describe("PrismaDriver", () => {
-  const adapter = new PrismaBetterSqlite3({
-    url: process.env.DATABASE_URL || "file:./dev.db",
-  });
+const TEST_DB = (process.env.TEST_DB ?? "sqlite") as "sqlite" | "postgres";
+const DATABASE_URL =
+  process.env.DATABASE_URL ??
+  (TEST_DB === "postgres"
+    ? "postgres://test:test@localhost:5433/test"
+    : "file:./dev.db");
+
+function makeAdapter(): SqlDriverAdapterFactory {
+  if (TEST_DB === "postgres") {
+    return new PrismaPg({ connectionString: DATABASE_URL });
+  }
+  return new PrismaBetterSqlite3({ url: DATABASE_URL });
+}
+
+describe(`PrismaDriver (${TEST_DB})`, () => {
+  const adapter = makeAdapter();
   const prisma = new PrismaClient({ adapter });
   let driver: PrismaDriver<typeof prisma>;
   let connection: PrismaConnection;

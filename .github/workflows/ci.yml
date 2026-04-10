@@ -40,11 +40,29 @@ jobs:
           path: dist/
 
   test:
-    name: Test (Node ${{ matrix.node-version }})
+    name: Test (Node ${{ matrix.node-version }}, ${{ matrix.backend }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         node-version: [20, 22, 24]
+        backend: [sqlite, postgres]
+    services:
+      # Postgres is only consumed when backend == postgres, but defining it
+      # unconditionally is cheaper than templating jobs.
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U test -d test"
+          --health-interval 1s
+          --health-timeout 3s
+          --health-retries 30
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -52,9 +70,21 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm ci
-      - run: npm run test:coverage
+      - name: Run tests (${{ matrix.backend }})
+        run: |
+          if [ "${{ matrix.backend }}" = "postgres" ]; then
+            POSTGRES_TEST_URL=postgres://test:test@localhost:5433/test \
+              npm run db:postgres:push
+            TEST_DB=postgres \
+              DATABASE_URL=postgres://test:test@localhost:5433/test \
+              npx vitest run --coverage
+          else
+            npm run db:sqlite:push
+            TEST_DB=sqlite DATABASE_URL=file:./dev.db \
+              npx vitest run --coverage
+          fi
       - name: Upload coverage to Codecov
-        if: matrix.node-version == fromJSON(env.NODE_LTS)
+        if: matrix.node-version == fromJSON(env.NODE_LTS) && matrix.backend == 'sqlite'
         uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
