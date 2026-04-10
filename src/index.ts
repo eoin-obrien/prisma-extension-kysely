@@ -45,28 +45,37 @@ export default <Database>(extensionArgs: PrismaKyselyExtensionArgs<Database>) =>
       },
     });
 
-    // Wrap the $transaction method to attach a fresh Kysely instance to the transaction client
+    // Wrap the $transaction method so each interactive transaction gets its own Kysely instance.
+    // The transaction-bound Kysely is exposed via a Proxy on the tx client — never by mutating
+    // the tx object — so concurrent transactions cannot interfere with each other.
     const kyselyTransaction =
       (target: typeof extendedClient) =>
       (...args: Parameters<typeof target.$transaction>) => {
         if (typeof args[0] === "function") {
-          // If the first argument is a function, add a fresh Kysely instance to the transaction client
           // biome-ignore lint/suspicious/noExplicitAny: @prisma/client/extension types $transaction overloads differently
           type ExtensionTransactionArgs = [(tx: any) => Promise<unknown>, any?];
           const [fn, options] = args as unknown as ExtensionTransactionArgs;
           return target.$transaction(async (tx) => {
-            // The Kysely instance should call the transaction client, not the original client
-            const driver = new PrismaDriver(tx);
-            const kysely = extensionArgs.kysely(driver);
-            // Attach the Kysely instance to the transaction client so that it can be accessed in the transaction function
-            // biome-ignore lint/suspicious/noExplicitAny: @prisma/client/extension types $transaction overloads differently
-            (tx as any).$kysely = kysely;
-            return fn(tx);
+            // The Kysely instance must use the transaction client, not the original client
+            const txDriver = new PrismaDriver(tx);
+            const txKysely = extensionArgs.kysely(txDriver);
+            // Wrap the tx client in a Proxy so $kysely resolves to the transaction-bound
+            // instance without mutating the underlying tx object. This is safe under
+            // concurrent transactions on databases like Postgres that actually run them
+            // in parallel — see issue #71.
+            const txProxy = new Proxy(tx, {
+              get: (txTarget, prop, receiver) => {
+                if (prop === "$kysely") {
+                  return txKysely;
+                }
+                return Reflect.get(txTarget, prop, receiver);
+              },
+            });
+            return fn(txProxy);
           }, options);
-        } else {
-          // Otherwise, just call the original $transaction method
-          return target.$transaction(...args);
         }
+        // Otherwise, just call the original $transaction method
+        return target.$transaction(...args);
       };
 
     // Attach the wrapped $transaction method to the extended client using a proxy

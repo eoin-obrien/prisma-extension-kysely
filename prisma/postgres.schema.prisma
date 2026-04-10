@@ -1,0 +1,22 @@
+// Postgres variant of prisma/schema.prisma. Used by `npm run test:postgres`
+// (and the `backend: postgres` matrix entry in CI) so the same suite runs
+// against both supported relational backends — see issue #71.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+generator kysely {
+  provider = "prisma-kysely"
+  output   = "../generated/kysely"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Model {
+  id    Int    @id @default(autoincrement())
+  value String
+}

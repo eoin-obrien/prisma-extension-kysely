@@ -35,7 +35,7 @@ The library is a Prisma Client Extension that bridges Kysely's query builder to 
 
 - **[src/index.ts](src/index.ts)** — Entry point. Exports the extension factory function. Uses `Prisma.defineExtension` to attach `$kysely` to the client. Wraps `$transaction` via a `Proxy` so that interactive transactions get a fresh `PrismaDriver`/`PrismaConnection` bound to the transaction client (not the original client).
 - **[src/driver.ts](src/driver.ts)** — `PrismaDriver` implements Kysely's `Driver` interface. Transaction methods intentionally throw — Kysely's own transaction API is unsupported; users must use `prisma.$transaction` instead.
-- **[src/connection.ts](src/connection.ts)** — `PrismaConnection` implements Kysely's `DatabaseConnection`. Routes SELECT queries through `$queryRawUnsafe` and mutation queries (INSERT/UPDATE/DELETE) without a RETURNING clause through `$executeRawUnsafe` (returning affected row count as a BigInt).
+- **[src/connection.ts](src/connection.ts)** — `PrismaConnection` implements Kysely's `DatabaseConnection`. Routes SELECT (and any query with a RETURNING clause) through `$queryRaw`, and mutation queries (INSERT/UPDATE/DELETE without RETURNING) through `$executeRaw`. **Both paths use the safe variants with a `Prisma.Sql`-shaped object** (built by `toSqlLike`) — *not* `$queryRawUnsafe`/`$executeRawUnsafe`. On Prisma 7 with driver adapters the unsafe variants escape the interactive transaction connection (writes auto-commit independently); the safe variants route correctly. See issue #71.
 
 ### Dual Package Build
 
@@ -47,17 +47,30 @@ The package is published as a dual ESM/CJS package:
 
 ### Tests
 
-Tests use Vitest ([vitest.config.ts](vitest.config.ts)). The test database is SQLite at [prisma/dev.db](prisma/dev.db), set up via `prisma db push` (the `pretest` script). The Prisma schema at [prisma/schema.prisma](prisma/schema.prisma) also generates Kysely types via `prisma-kysely` to [generated/kysely/types.ts](generated/kysely/types.ts).
+Tests use Vitest ([vitest.config.ts](vitest.config.ts)) and run against **both SQLite and Postgres** — selected at runtime via the `TEST_DB` env var:
+
+- `npm run test:sqlite` — default. Uses SQLite at [prisma/dev.db](prisma/dev.db) and the [prisma/schema.prisma](prisma/schema.prisma) schema. No external dependencies.
+- `npm run test:postgres` — boots a local Postgres via [docker-compose.yml](docker-compose.yml) (`db:postgres:up`), pushes the [prisma/postgres.schema.prisma](prisma/postgres.schema.prisma) variant, then runs the same suite under postgres. Requires Docker.
+- `npm test` — sqlite only (kept as the contributor-friendly default; CI runs both via a `backend: [sqlite, postgres]` matrix in [.github/workflows/ci.yml](.github/workflows/ci.yml)).
+
+[test/index.test.ts](test/index.test.ts) and [test/driver.test.ts](test/driver.test.ts) pick the prisma adapter (`PrismaBetterSqlite3` vs `PrismaPg`) and the kysely dialect (`SqliteAdapter` vs `PostgresAdapter`) from `TEST_DB`. [test/connection.test.ts](test/connection.test.ts) is a backend-agnostic unit test for the `PrismaConnection` routing logic using a fake prisma client (it does NOT spy on the real prisma client — replacing `$queryRaw` / `$executeRaw` with a bound copy of the original breaks interactive transaction routing). The Prisma schemas also generate Kysely types via `prisma-kysely` to [generated/kysely/types.ts](generated/kysely/types.ts).
 
 ### Examples
 
 Runnable examples live in [examples/](examples/) (basic, camel-case, esm, logging, read-replica). Each is a self-contained project with its own `package.json` and Prisma schema. They are run in CI but are not part of the main test suite.
 
-## Go-Forward Plan (as of Feb 2026)
+## Go-Forward Plan (as of Apr 2026)
 
 ### Active
 
-1. **Transaction reliability (Issue #71)** — Reports that `tx.$kysely` inside `prisma.$transaction` doesn't always use the transaction client. The current Proxy-based implementation is covered by 30 integration tests (all passing). Monitor for new reproduction cases.
+_(none)_
+
+### Completed (v4.x)
+
+- ✅ **Transaction reliability — postgres concurrency hole (Issue #71)** — Two coupled fixes:
+  1. `src/index.ts` no longer mutates `tx.$kysely` inside `$transaction`; it returns a per-call `Proxy` whose `get` trap exposes the tx-bound Kysely. No shared state across concurrent transactions.
+  2. `src/connection.ts` switched from `$executeRawUnsafe` / `$queryRawUnsafe` to the safe `$executeRaw` / `$queryRaw` variants with a `Prisma.Sql`-shaped object built by `toSqlLike`. On Prisma 7 + driver adapters the unsafe variants escape the interactive transaction connection and auto-commit; the safe variants route correctly. The whole suite now runs against both SQLite and Postgres in CI to keep this regression caught — SQLite alone masked the bug because better-sqlite3 is single-connection.
+- ✅ **Dual-backend test infra** — `TEST_DB` env var, `prisma/postgres.schema.prisma` variant, `docker-compose.yml`, `npm run test:sqlite` / `test:postgres` scripts, and a `backend: [sqlite, postgres]` matrix in CI.
 
 ### Completed (v4.0)
 

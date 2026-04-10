@@ -1,33 +1,64 @@
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
+import type { SqlDriverAdapterFactory } from "@prisma/client/runtime/library";
 import { readReplicas } from "@prisma/extension-read-replicas";
 import {
-  type Compilable,
   DeleteResult,
+  type Dialect,
   InsertResult,
   Kysely,
   type KyselyPlugin,
+  PostgresAdapter,
+  PostgresIntrospector,
+  PostgresQueryCompiler,
   SqliteAdapter,
   SqliteIntrospector,
   SqliteQueryCompiler,
   UpdateResult,
 } from "kysely";
-import type { MockInstance } from "vitest";
 import type { DB } from "../generated/kysely/types.js";
 import { PrismaClient } from "../generated/prisma/client.js";
+import type { PrismaDriver } from "../src/driver.js";
 import kyselyExtension from "../src/index.js";
+
+// Test backend is selected at runtime via TEST_DB so the same suite can run
+// against both sqlite and postgres (issue #71). DATABASE_URL is set per backend
+// by the matching `test:sqlite` / `test:postgres` npm script.
+const TEST_DB = (process.env.TEST_DB ?? "sqlite") as "sqlite" | "postgres";
+const DATABASE_URL =
+  process.env.DATABASE_URL ??
+  (TEST_DB === "postgres"
+    ? "postgres://test:test@localhost:5433/test"
+    : "file:./dev.db");
+
+function makeAdapter(): SqlDriverAdapterFactory {
+  if (TEST_DB === "postgres") {
+    return new PrismaPg({ connectionString: DATABASE_URL });
+  }
+  return new PrismaBetterSqlite3({ url: DATABASE_URL });
+}
+
+function makeDialect(driver: PrismaDriver<unknown>): Dialect {
+  if (TEST_DB === "postgres") {
+    return {
+      createAdapter: () => new PostgresAdapter(),
+      createDriver: () => driver,
+      createIntrospector: (db) => new PostgresIntrospector(db),
+      createQueryCompiler: () => new PostgresQueryCompiler(),
+    };
+  }
+  return {
+    createAdapter: () => new SqliteAdapter(),
+    createDriver: () => driver,
+    createIntrospector: (db) => new SqliteIntrospector(db),
+    createQueryCompiler: () => new SqliteQueryCompiler(),
+  };
+}
 
 function withKysely(client: PrismaClient) {
   return client.$extends(
     kyselyExtension({
-      kysely: (driver) =>
-        new Kysely<DB>({
-          dialect: {
-            createAdapter: () => new SqliteAdapter(),
-            createDriver: () => driver,
-            createIntrospector: (db) => new SqliteIntrospector(db),
-            createQueryCompiler: () => new SqliteQueryCompiler(),
-          },
-        }),
+      kysely: (driver) => new Kysely<DB>({ dialect: makeDialect(driver) }),
     }),
   );
 }
@@ -37,32 +68,15 @@ async function expectModelCount(client: PrismaClient, count: number) {
   expect(models).toHaveLength(count);
 }
 
-describe("prisma-extension-kysely", () => {
-  const adapter = new PrismaBetterSqlite3({
-    url: process.env.DATABASE_URL || "file:./dev.db",
-  });
+describe(`prisma-extension-kysely (${TEST_DB})`, () => {
+  const adapter = makeAdapter();
   const prisma = new PrismaClient({ adapter });
   const xprisma = withKysely(prisma);
 
-  // Prisma 7's client is a Proxy; own property values are undefined but the Proxy get trap
-  // returns the actual function. Vitest's vi.spyOn reads from the descriptor (undefined),
-  // so we capture the originals first and pass them as the spy implementation.
-  const origQueryRawUnsafe = prisma.$queryRawUnsafe.bind(prisma);
-  const origExecuteRawUnsafe = prisma.$executeRawUnsafe.bind(prisma);
-  const $queryRawUnsafeSpy = vi
-    .spyOn(prisma, "$queryRawUnsafe")
-    .mockImplementation(origQueryRawUnsafe);
-  const $executeRawUnsafeSpy = vi
-    .spyOn(prisma, "$executeRawUnsafe")
-    .mockImplementation(origExecuteRawUnsafe);
-
-  const checkSpyCalledWith = (
-    spy: MockInstance,
-    query: Compilable<unknown>,
-  ) => {
-    const { sql, parameters } = query.compile();
-    expect(spy).toHaveBeenCalledWith(sql, ...parameters);
-  };
+  // We no longer spy on `prisma.$executeRaw` / `prisma.$queryRaw` directly: doing
+  // so would replace the per-tx-bound implementation with one bound to the outer
+  // client, breaking interactive transaction routing. The connection-layer
+  // branching logic is covered by `test/connection.test.ts` instead.
 
   let testRow: { id: number; value: string };
 
@@ -75,9 +89,6 @@ describe("prisma-extension-kysely", () => {
       .values({ value: "test" })
       .returningAll()
       .executeTakeFirstOrThrow();
-    // Reset the spies
-    $queryRawUnsafeSpy.mockClear();
-    $executeRawUnsafeSpy.mockClear();
   });
 
   it("should add the Kysely instance to the Prisma client", async () => {
@@ -97,7 +108,6 @@ describe("prisma-extension-kysely", () => {
       .selectAll()
       .where("id", "=", testRow.id);
     await expect(query.execute()).resolves.toEqual([testRow]);
-    checkSpyCalledWith($queryRawUnsafeSpy, query);
   });
 
   it("should execute an insert query and return the number of rows affected", async () => {
@@ -107,7 +117,6 @@ describe("prisma-extension-kysely", () => {
     await expect(query.execute()).resolves.toEqual([
       new InsertResult(undefined, BigInt(1)),
     ]);
-    checkSpyCalledWith($executeRawUnsafeSpy, query);
   });
 
   it("should execute an update query and return the number of rows affected", async () => {
@@ -118,7 +127,6 @@ describe("prisma-extension-kysely", () => {
     await expect(query.execute()).resolves.toEqual([
       new UpdateResult(BigInt(1), undefined),
     ]);
-    checkSpyCalledWith($executeRawUnsafeSpy, query);
   });
 
   it("should execute a delete query and return the number of rows affected", async () => {
@@ -128,7 +136,6 @@ describe("prisma-extension-kysely", () => {
     await expect(query.execute()).resolves.toEqual([
       new DeleteResult(BigInt(1)),
     ]);
-    checkSpyCalledWith($executeRawUnsafeSpy, query);
   });
 
   it("should execute an insert query with a returning clause and return the results", async () => {
@@ -139,7 +146,6 @@ describe("prisma-extension-kysely", () => {
     await expect(query.execute()).resolves.toEqual([
       { id: expect.any(Number), value: "inserted" },
     ]);
-    checkSpyCalledWith($queryRawUnsafeSpy, query);
   });
 
   it("should execute an update query with a returning clause and return the results", async () => {
@@ -151,7 +157,6 @@ describe("prisma-extension-kysely", () => {
     await expect(query.execute()).resolves.toEqual([
       { id: testRow.id, value: "updated" },
     ]);
-    checkSpyCalledWith($queryRawUnsafeSpy, query);
   });
 
   it("should execute an update query with a returning clause and return the results", async () => {
@@ -160,7 +165,6 @@ describe("prisma-extension-kysely", () => {
       .where("id", "=", testRow.id)
       .returningAll();
     await expect(query.execute()).resolves.toEqual([testRow]);
-    checkSpyCalledWith($queryRawUnsafeSpy, query);
   });
 
   it("should throw an error if a query is executed with a stream", async () => {
@@ -262,6 +266,66 @@ describe("prisma-extension-kysely", () => {
     expect(instances[0]).not.toBe(instances[1]);
     // The outer instance must be unchanged after both transactions complete
     expect(xprisma.$kysely).toBe(outerKysely);
+  });
+
+  it("should isolate $kysely across many concurrent transactions", async () => {
+    // Stress-test the proxy: under a backend with real concurrency (postgres),
+    // any shared state across transactions would surface here as either a
+    // duplicated $kysely reference or a tx's write landing under the wrong tag.
+    // We deliberately do NOT assert read isolation between transactions —
+    // SQLite serializes write transactions, so by the time tx_n runs, the
+    // tags from tx_0..tx_(n-1) are visible. The concern from issue #71 is
+    // $kysely instance leakage, not isolation level.
+    const outerKysely = xprisma.$kysely;
+    const N = 8;
+    const tags = Array.from({ length: N }, (_, i) => `concurrent-${i}`);
+    const seenInstances: Kysely<DB>[] = [];
+
+    try {
+      await Promise.all(
+        tags.map((tag, i) =>
+          xprisma.$transaction(async (tx) => {
+            seenInstances[i] = tx.$kysely;
+            // Insert this tx's tag via kysely.
+            const inserted = await tx.$kysely
+              .insertInto("Model")
+              .values({ value: tag })
+              .returningAll()
+              .executeTakeFirstOrThrow();
+            expect(inserted.value).toBe(tag);
+            // The same row must be visible via prisma on the same tx — this is
+            // what would break if tx.$kysely were bound to the wrong connection.
+            const viaPrisma = await tx.model.findUnique({
+              where: { id: inserted.id },
+              select: { value: true },
+            });
+            expect(viaPrisma?.value).toBe(tag);
+          }),
+        ),
+      );
+
+      // Every tx had a distinct $kysely, none equal to the outer instance.
+      expect(new Set(seenInstances).size).toBe(N);
+      for (const inst of seenInstances) {
+        expect(inst).not.toBe(outerKysely);
+      }
+      // After all transactions commit, every tag must be present exactly once.
+      const allTags = await xprisma.$kysely
+        .selectFrom("Model")
+        .select("value")
+        .where("value", "like", "concurrent-%")
+        .orderBy("value")
+        .execute();
+      expect(allTags.map((r) => r.value).sort()).toEqual([...tags].sort());
+      // The outer instance is unchanged.
+      expect(xprisma.$kysely).toBe(outerKysely);
+    } finally {
+      // Clean up so a failure here can't pollute later tests.
+      await xprisma.$kysely
+        .deleteFrom("Model")
+        .where("value", "like", "concurrent-%")
+        .execute();
+    }
   });
 
   it("should forbid the use of kysely's built-in transactions", async () => {
