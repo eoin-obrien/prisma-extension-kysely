@@ -154,7 +154,7 @@ describe("prisma-extension-kysely", () => {
     checkSpyCalledWith($queryRawUnsafeSpy, query);
   });
 
-  it("should execute an update query with a returning clause and return the results", async () => {
+  it("should execute a delete query with a returning clause and return the results", async () => {
     const query = xprisma.$kysely
       .deleteFrom("Model")
       .where("id", "=", testRow.id)
