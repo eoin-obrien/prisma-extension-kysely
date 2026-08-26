@@ -31,7 +31,8 @@ export class PrismaConnection implements DatabaseConnection {
       DeleteQueryNode.is(query) ||
       UpdateQueryNode.is(query) ||
       InsertQueryNode.is(query);
-    const shouldReturnAffectedRows = supportsReturning && !query.returning;
+    const shouldReturnAffectedRows =
+      supportsReturning && !query.returning && !query.output;
 
     try {
       // Execute the query with $executeRawUnsafe to get the number of affected rows
